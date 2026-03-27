@@ -2,7 +2,8 @@
 
 ## Cấu trúc web:
 
-frontend/ (src/)
+- frontend:
+web-frontend/src/
 ├── assets/                  # Tài nguyên tĩnh
 │   ├── images/              # Banner bộ sưu tập, Logo Brand
 │   ├── icons/               # Icon thước đo, chất liệu
@@ -17,6 +18,7 @@ frontend/ (src/)
 ├── hooks/                   # Custom hooks (useInventory)
 └── pages/                   # Các trang chính (BrandPage, SizeGuide)
 
+- backend
 backend/
 ├── config/                  # Kết nối Database (MySQL)
 ├── controllers/             # Xử lý Logic (Product, Order)
@@ -31,10 +33,12 @@ backend/
 ## Dowload icon:   
   `npm install lucide-react`
 
-## Dowload web-frontend:   
-  `npm create vite@latest web-frontend -- --template react`
-
-## Dowload package:    
+## Dowload package:  
+- backend:
+  `cd backtend`
+  `npm install`
+  `npm install lucide-react react-router-dom`
+- frontend:
   `cd web-frontend`
   `npm install`
   `npm install lucide-react react-router-dom`
