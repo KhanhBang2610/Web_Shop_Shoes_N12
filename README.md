@@ -34,8 +34,10 @@ backend/
 ## Dowload web-frontend:   
   `npm create vite@latest web-frontend -- --template react`
 
-## Dowload package:    `cd web-frontend`
-                    `npm install`
-                    `npm install lucide-react react-router-dom`
+## Dowload package:    
+  `cd web-frontend`
+  `npm install`
+  `npm install lucide-react react-router-dom`
 
-## Run web:   `npm run dev`
+## Run web:   
+  `npm run dev`
