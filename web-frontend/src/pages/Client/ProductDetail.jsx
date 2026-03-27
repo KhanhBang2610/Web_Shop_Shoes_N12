@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate(); // Dùng để chuyển trang khi Mua ngay
+  const navigate = useNavigate(); 
   const [product, setProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const sizes = [38, 39, 40, 41, 42, 43]; 
@@ -15,46 +15,47 @@ const ProductDetail = () => {
       .catch(err => console.error("Lỗi lấy chi tiết sản phẩm:", err));
   }, [id]);
 
-  // HÀM QUAN TRỌNG: Thêm vào giỏ hàng kèm Size
   const handleAddToCart = (isBuyNow = false) => {
     if (!selectedSize) {
       alert("Vui lòng chọn Size giày trước khi tiếp tục!");
       return;
     }
 
-    // 1. Lấy giỏ hàng hiện tại từ localStorage
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // 2. Tạo đối tượng sản phẩm mới có kèm Size đã chọn
-    const cartItem = {
+    // Tạo đối tượng sản phẩm hiện tại
+    const currentItem = {
       id: product.id,
       name: product.name,
       price: product.price,
       image_url: product.image_url,
-      size: selectedSize, // Lưu số size (VD: 42) vào đây
+      size: selectedSize, 
       quantity: 1
     };
 
-    // 3. Kiểm tra xem đã có cùng sản phẩm + cùng size này trong giỏ chưa
-    const existingIndex = cart.findIndex(item => item.id === product.id && item.size === selectedSize);
-
-    if (existingIndex > -1) {
-      cart[existingIndex].quantity += 1;
-    } else {
-      cart.push(cartItem);
-    }
-
-    // 4. Lưu lại vào localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // 5. Kích hoạt sự kiện để Header cập nhật số lượng
-    window.dispatchEvent(new Event('storage'));
-
     if (isBuyNow) {
-      // Nếu là Mua ngay thì nhảy thẳng tới trang giỏ hàng
-      navigate('/cart');
+      /**
+       * LUỒNG MUA NGAY:
+       * Chuyển hướng sang Checkout và đính kèm thông tin sản phẩm này qua 'state'.
+       * Cách này giúp trang Checkout biết bạn chỉ muốn mua DUY NHẤT món này,
+       * không liên quan đến giỏ hàng hiện có trong localStorage.
+       */
+      navigate('/checkout', { state: { buyNowItem: currentItem } });
     } else {
-      alert(`Đã thêm ${product.name} - Size ${selectedSize} vào giỏ hàng thành công!`);
+      /**
+       * LUỒNG THÊM GIỎ HÀNG:
+       * Lưu vào localStorage như bình thường.
+       */
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existingIndex = cart.findIndex(item => item.id === product.id && item.size === selectedSize);
+
+      if (existingIndex > -1) {
+        cart[existingIndex].quantity += 1;
+      } else {
+        cart.push(currentItem);
+      }
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('storage'));
+      alert(`Đã thêm ${product.name} - Size ${selectedSize} vào giỏ hàng!`);
     }
   };
 
@@ -63,7 +64,6 @@ const ProductDetail = () => {
   return (
     <div style={styles.container}>
       <div style={styles.flexBox}>
-        {/* Bên trái: Hình ảnh */}
         <div style={styles.imageSection}>
           <img 
             src={product.image_url ? `http://localhost:5000${product.image_url}` : 'https://via.placeholder.com/500'} 
@@ -72,7 +72,6 @@ const ProductDetail = () => {
           />
         </div>
 
-        {/* Bên phải: Thông tin */}
         <div style={styles.infoSection}>
           <p style={styles.category}>{product.category_name || 'SNEAKERS'}</p>
           <h1 style={styles.title}>{product.name}</h1>
@@ -82,7 +81,6 @@ const ProductDetail = () => {
 
           <p style={styles.description}>{product.description || "Sản phẩm chất lượng cao, thiết kế thời trang phù hợp mọi hoạt động."}</p>
 
-          {/* Chọn Size */}
           <div style={{ marginTop: '30px' }}>
             <h4 style={{ marginBottom: '15px' }}>Chọn Size (EU):</h4>
             <div style={styles.sizeGrid}>
@@ -103,7 +101,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Nút hành động */}
           <div style={styles.actionBox}>
             <button 
               style={styles.addCartBtn} 

@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CustomerLayout from './components/layout/CustomerLayout';
 import AdminLayout from './components/layout/AdminLayout';
@@ -13,6 +14,9 @@ import Auth from './pages/Client/Auth';
 import Home from './pages/Client/Home';
 import ProductDetail from './pages/Client/ProductDetail'; // Trang mới
 import Cart from './pages/Client/Cart';
+import Checkout from './pages/Client/Checkout';
+import Success from './pages/Client/Success'; 
+import MyOrders from './pages/Client/MyOrders';
 
 function App() {
   return (
@@ -31,7 +35,13 @@ function App() {
 
           {/* path="/login": Trang đăng nhập của khách */}
           <Route path="login" element={<Auth />} />
+
+          <Route path="checkout" element={<Checkout />} />
+
+          <Route path="success" element={<Success />} />
           
+          <Route path="my-orders" element={<MyOrders />} />
+
           {/* Sau này bạn có thể thêm: 
               <Route path="products" element={<ProductList />} /> 
           */}

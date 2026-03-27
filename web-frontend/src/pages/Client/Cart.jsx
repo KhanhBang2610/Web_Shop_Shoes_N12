@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // 1. Thêm useNavigate
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
+  const navigate = useNavigate(); // 2. Khởi tạo navigate
 
   // Load giỏ hàng từ localStorage
   const loadCart = () => {
@@ -17,7 +18,6 @@ const Cart = () => {
   // Hàm thay đổi số lượng
   const updateQuantity = (id, size, delta) => {
     const updatedCart = cartItems.map(item => {
-      // Quan trọng: Phải khớp cả ID và Size
       if (item.id === id && item.size === size) {
         const newQty = item.quantity + delta;
         return { ...item, quantity: newQty > 0 ? newQty : 1 };
@@ -36,7 +36,7 @@ const Cart = () => {
   const saveCart = (newCart) => {
     localStorage.setItem('cart', JSON.stringify(newCart));
     setCartItems(newCart);
-    window.dispatchEvent(new Event('storage')); // Cập nhật badge trên Header
+    window.dispatchEvent(new Event('storage')); 
   };
 
   const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -58,7 +58,6 @@ const Cart = () => {
                 
                 <div style={styles.itemInfo}>
                   <h3 style={styles.itemName}>{item.name}</h3>
-                  {/* HIỂN THỊ SIZE Ở ĐÂY */}
                   <p style={styles.itemSize}>Size: <strong>{item.size || 'N/A'}</strong></p>
                   <p style={styles.itemPrice}>{Number(item.price).toLocaleString()}đ</p>
                 </div>
@@ -75,7 +74,14 @@ const Cart = () => {
 
             <div style={styles.footer}>
               <h2 style={styles.totalText}>Tổng cộng: {totalPrice.toLocaleString()}đ</h2>
-              <button style={styles.checkoutBtn}>TIẾN HÀNH THANH TOÁN</button>
+              
+              {/* 3. Thêm sự kiện onClick để chuyển hướng sang Checkout */}
+              <button 
+                onClick={() => navigate('/checkout')} 
+                style={styles.checkoutBtn}
+              >
+                TIẾN HÀNH THANH TOÁN
+              </button>
             </div>
           </>
         ) : (
@@ -90,7 +96,7 @@ const Cart = () => {
 };
 
 const styles = {
-  container: { maxWidth: '900px', margin: '50px auto', padding: '0 20px' },
+  container: { maxWidth: '900px', margin: '50px auto', padding: '0 20px', minHeight: '70vh' },
   title: { textAlign: 'center', marginBottom: '30px', fontSize: '28px' },
   cartBox: { background: '#fff', borderRadius: '15px', padding: '20px', boxShadow: '0 5px 20px rgba(0,0,0,0.05)' },
   itemRow: { display: 'flex', alignItems: 'center', padding: '20px 0', borderBottom: '1px solid #eee', gap: '20px' },
@@ -105,7 +111,7 @@ const styles = {
   removeBtn: { color: '#e74c3c', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold' },
   footer: { marginTop: '30px', textAlign: 'right' },
   totalText: { fontSize: '24px', marginBottom: '20px' },
-  checkoutBtn: { padding: '15px 40px', background: '#2d3436', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }
+  checkoutBtn: { padding: '15px 40px', background: '#2d3436', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s' }
 };
 
 export default Cart;
