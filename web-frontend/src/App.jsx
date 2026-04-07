@@ -41,7 +41,13 @@ function App() {
           <Route path="checkout" element={<Checkout />} />
           <Route path="success" element={<Success />} />
           <Route path="my-orders" element={<MyOrders />} />
+          <Route path="/purchase-history" element={<PurchaseHistory />} />
+          <Route path="/myorders" element={<MyOrders />} />
+          <Route path="profile" element={<Profile />} />
 
+          {/* Sau này bạn có thể thêm: 
+              <Route path="products" element={<ProductList />} /> 
+          */}
           {/* 2. THÊM ĐƯỜNG DẪN CHO TRANG PROFILE */}
           <Route path="profile" element={<Profile />} />
           <Route path="purchase-history" element={<PurchaseHistory />} />

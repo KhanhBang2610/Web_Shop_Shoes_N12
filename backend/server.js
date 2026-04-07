@@ -89,6 +89,10 @@ app.post('/api/login', (req, res) => {
         else res.status(401).json({ message: "Email hoặc mật khẩu không đúng!" });
     });
 });
+// --- [USER & AUTH] GỌI TỪ CONTROLLER MỚI TẠO ---
+// (Đã xóa 2 API login/register cũ ở đây)
+app.use('/api', require('./routes/api'));       // Gọi file routes/api.js (chứa login, register)
+app.use('/api/user', require('./routes/user')); // Gọi file routes/user.js (chứa profile)
 
 
 // --- [PRODUCT] QUẢN LÝ SẢN PHẨM ---

@@ -76,23 +76,28 @@ const CustomerLayout = () => {
           </div>
           
           <div style={styles.menu}>
-            
-            {user && (
-              <>
-                <Link to="/purchase-history" style={styles.navItem}>
-                  📜 Lịch sử mua
-                </Link>
-                <Link to="/profile" style={styles.navItem}>
-                  👤 Tài khoản
-                </Link>
-              </>
-            )}
-            
-            <Link to="/cart" style={styles.cartWrapper}>
-              <span style={{ fontSize: '22px' }}>🛒</span>
-              {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
-            </Link>
+            <div style={styles.navGroup}>
+              {/* Nút Giỏ hàng */}
+              <Link to="/cart" style={styles.navLink}>
+                <div style={styles.iconWrapper}>
+                  <span style={{ fontSize: '22px' }}>🛒</span>
+                  {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
+                </div>
+                <span>Giỏ hàng</span>
+              </Link>
 
+              {/* Nút Lịch sử */}
+              <Link to="/purchase-history" style={styles.navLink}>
+                <span style={{ fontSize: '22px' }}>📜</span>
+                <span>Lịch sử</span>
+              </Link>
+
+              {/* Nút Đơn hàng */}
+              <Link to="/orders" style={styles.navLink}>
+                <span style={{ fontSize: '22px' }}>📦</span>
+                <span>Đơn hàng</span>
+              </Link>
+            </div>
             <div style={styles.authSection}>
               {user ? (
                 <>
@@ -134,7 +139,9 @@ const styles = {
   searchBtn: { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '16px' },
   menu: { display: 'flex', gap: '20px', alignItems: 'center' },
   navItem: { textDecoration: 'none', color: '#555', fontWeight: '500', fontSize: '14px' },
-  cartWrapper: { position: 'relative', textDecoration: 'none', cursor: 'pointer' },
+  navGroup: { display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '25px', marginRight: '20px' },
+  navLink: { display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: '#555', fontWeight: '500', fontSize: '14px' },
+  iconWrapper: { position: 'relative' },
   cartBadge: { position: 'absolute', top: '-8px', right: '-10px', background: '#e74c3c', color: '#fff', fontSize: '10px', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontWeight: 'bold' },
   authSection: { display: 'flex', alignItems: 'center', gap: '8px', borderLeft: '1px solid #eee', paddingLeft: '15px' },
   welcomeText: { fontSize: '14px', color: '#555' },

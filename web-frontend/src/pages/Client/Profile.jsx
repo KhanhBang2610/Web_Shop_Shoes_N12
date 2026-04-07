@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Edit2, LogOut, Mail, User, Phone, MapPin, Calendar } from 'lucide-react';
+import axios from 'axios';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -32,13 +33,21 @@ const Profile = () => {
       [name]: value
     }));
   };
+  
+  // Cập nhật thông tin người dùng trong localStorage
+  const handleSave = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/update/${user.id}`, formData);
 
-  const handleSave = () => {
-    // Cập nhật thông tin người dùng trong localStorage
-    localStorage.setItem('user', JSON.stringify(formData));
-    setUser(formData);
-    setIsEditing(false);
-    alert('✅ Cập nhật thông tin thành công!');
+      const updatedUser = { ...user, ...formData };
+
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      alert('✅ Cập nhật thông tin thành công!');
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (loading) {
@@ -194,26 +203,7 @@ const Profile = () => {
 
       {/* Các liên kết nhanh */}
       <div style={styles.quickLinks}>
-        <h3 style={styles.quickTitle}>🔗 Liên kết nhanh</h3>
         <div style={styles.linkGrid}>
-          <button 
-            onClick={() => navigate('/cart')}
-            style={styles.linkBtn}
-          >
-            🛒 Giỏ hàng
-          </button>
-          <button 
-            onClick={() => navigate('/purchase-history')}
-            style={styles.linkBtn}
-          >
-            📜 Lịch sử mua hàng
-          </button>
-          <button 
-            onClick={() => navigate('/my-orders')}
-            style={styles.linkBtn}
-          >
-            📦 Đơn hàng
-          </button>
           <button 
             onClick={() => navigate('/')}
             style={styles.linkBtn}
