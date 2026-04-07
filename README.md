@@ -1,46 +1,53 @@
-# Web_Shop_Shoes_N12
+# 👟 Web_Shop_Shoes_N12
 
-## Cấu trúc web:
+Dự án Website bán giày trực tuyến (E-commerce) được xây dựng theo mô hình Fullstack (Node.js & React).
 
-web-frontend/src/
-├── assets/                  # Tài nguyên tĩnh
-│   ├── images/              # Banner bộ sưu tập, Logo Brand
-│   ├── icons/               # Icon thước đo, chất liệu
-│   └── size-charts/         # Ảnh bảng quy đổi size (EU, US, UK)
-├── api/                     # Quản lý gọi API
-│   ├── productApi.js        # Lọc theo Size, Thương hiệu, Màu sắc
-│   └── brandApi.js          # Lấy danh sách hãng giày
-├── components/              # Thành phần giao diện
-│   ├── common/              # Dùng chung (Modal, ShoeCard)
-│   └── features/            # Theo nghiệp vụ (SizePicker, Tracking)
-├── constants/               # Hằng số (Bảng size chuẩn 36-45)
-├── hooks/                   # Custom hooks (useInventory)
-└── pages/                   # Các trang chính (BrandPage, SizeGuide)
+## 🛠 Công nghệ sử dụng
+- **Frontend:** React, Vite, React Router DOM, Lucide React.
+- **Backend:** Node.js, Express, Multer (Upload file).
+- **Database:** MySQL.
 
-backend/
-├── config/                  # Kết nối Database (MySQL)
-├── controllers/             # Xử lý Logic (Product, Order)
-├── models/                  # Schema dữ liệu (Product, Variant, User)
-├── routes/                  # Định nghĩa API Routes
-└── server.js                # Entry point
+---
 
-## Dowload database in terminal:   
-  `npm init -y`
-  `npm install express mysql2 cors`
+## 📂 Cấu trúc dự án
 
-## Dowload icon:   
-  `npm install lucide-react`
+```text
+📦 Web_Shop_Shoes_N12
+├── 📂 backend/               # Chứa mã nguồn Server Node.js
+│   ├── config/               # Cấu hình Database
+│   ├── controllers/          # Xử lý Logic (Product, Order, User)
+│   ├── models/               # Cấu trúc dữ liệu
+│   ├── routes/               # API Routes
+│   ├── uploads/              # Thư mục lưu ảnh sản phẩm upload
+│   └── server.js             # Entry point (Port 5000)
+│
+└── 📂 web-frontend/          # Chứa mã nguồn Giao diện React
+    ├── public/
+    └── src/
+        ├── api/              # Gọi API tới Backend
+        ├── assets/           # Hình ảnh, banner, icons
+        ├── components/       # Các UI Component
+        ├── constants/        # Hằng số (Bảng size...)
+        └── pages/            # Các trang chính
 
-## Dowload package:  
-- backend:
-  `cd backtend`
-  `npm install`
-  `npm install lucide-react react-router-dom`
-- frontend:
-  `cd web-frontend`
-  `npm install`
-  `npm install lucide-react react-router-dom`
+## 🚀 Hướng dẫn cài đặt (Local Setup)
 
-## Run web:   
-- backend:  `cd backend`    `node server.js`
-- frontend:  `cd web-frontend`    `npm run dev`
+### Bước 1: Khởi tạo Database
+1. Mở phần mềm quản lý MySQL (Workbench, XAMPP, Laragon...).
+2. Tạo một Database mới với tên là `web_shoes`.
+3. Import file `shoes.sql` vào database vừa tạo.
+4. Mở file mã nguồn Backend (thường là `backend/server.js` hoặc file trong `config/`), kiểm tra và cập nhật `user` cùng `password` cho khớp với MySQL trên máy của bạn.
+
+### Bước 2: Cài đặt và chạy Backend
+Mở Terminal tại thư mục gốc của dự án và chạy các lệnh sau:
+
+    cd backend
+    npm install
+    node server.js
+
+### Bước 3: Cài đặt và chạy Frontend
+Mở một cửa sổ Terminal **mới** tại thư mục gốc và chạy:
+
+    cd web-frontend
+    npm install
+    npm run dev

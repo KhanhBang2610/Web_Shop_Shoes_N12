@@ -5,6 +5,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// --- THÊM THƯ VIỆN CHO SOCKET.IO ---
+const http = require('http');
+const { Server } = require('socket.io');
+
 const app = express();
 
 // ==========================================
@@ -21,7 +25,26 @@ if (!fs.existsSync(uploadDir)) {
 app.use('/uploads', express.static('uploads'));
 
 // ==========================================
-// 2. KẾT NỐI DATABASE (Pool Connection)
+// 1.5 CẤU HÌNH SOCKET.IO (MỚI)
+// ==========================================
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: "*" }
+});
+
+// Truyền io vào request để Controller có thể dùng gọi thông báo realtime
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
+
+io.on('connection', (socket) => {
+    console.log('⚡ Có client kết nối Socket:', socket.id);
+    socket.on('disconnect', () => console.log('Client ngắt kết nối Socket'));
+});
+
+// ==========================================
+// 2. KẾT NỐI DATABASE (Giữ nguyên cho các API cũ)
 // ==========================================
 const db = mysql.createPool({
     host: 'localhost',
@@ -60,20 +83,17 @@ const upload = multer({ storage: storage });
 // --- [USER] ĐĂNG NHẬP & ĐĂNG KÝ ---
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
-    db.query("SELECT id, fullname, role FROM users WHERE email = ? AND password = ?", [email, password], (err, results) => {
+    db.query("SELECT id, fullname, email, role FROM users WHERE email = ? AND password = ?", [email, password], (err, results) => {
         if (err) return res.status(500).json({ message: "Lỗi hệ thống" });
         if (results.length > 0) res.json({ message: "Đăng nhập thành công", user: results[0] });
         else res.status(401).json({ message: "Email hoặc mật khẩu không đúng!" });
     });
 });
+// --- [USER & AUTH] GỌI TỪ CONTROLLER MỚI TẠO ---
+// (Đã xóa 2 API login/register cũ ở đây)
+app.use('/api', require('./routes/api'));       // Gọi file routes/api.js (chứa login, register)
+app.use('/api/user', require('./routes/user')); // Gọi file routes/user.js (chứa profile)
 
-app.post('/api/register', (req, res) => {
-    const { fullname, email, password } = req.body;
-    db.query("INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, 'customer')", [fullname, email, password], (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Đăng ký thành công!" });
-    });
-});
 
 // --- [PRODUCT] QUẢN LÝ SẢN PHẨM ---
 app.get('/api/products', (req, res) => {
@@ -237,7 +257,7 @@ app.post('/api/orders/checkout', async (req, res) => {
     }
 });
 
-// --- [ADMIN] THỐNG KÊ DASHBOARD (ĐÃ CẬP NHẬT CHI TIẾT) ---
+// --- [ADMIN] THỐNG KÊ DASHBOARD ---
 app.get('/api/admin/status', (req, res) => {
     const sql = `SELECT 
         (SELECT COUNT(*) FROM products) as totalProducts,
@@ -256,10 +276,10 @@ app.get('/api/admin/status', (req, res) => {
 // 5. KHỞI CHẠY SERVER
 // ==========================================
 const PORT = 5000;
-app.listen(PORT, () => {
+// THAY ĐỔI: Chạy bằng server.listen để kích hoạt cả Express và Socket.io
+server.listen(PORT, () => {
     console.log(`=========================================`);
-    console.log(`🚀 Server đang chạy tại: http://localhost:${PORT}`);
+    console.log(`🚀 Server + Socket.io đang chạy tại: http://localhost:${PORT}`);
     console.log(`📂 Ảnh upload lưu tại: /uploads/`);
     console.log(`=========================================`);
 });
-

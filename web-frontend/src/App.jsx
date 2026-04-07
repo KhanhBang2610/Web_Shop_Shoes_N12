@@ -12,59 +12,57 @@ import CategoryManagement from './pages/Admin/CategoryManagement';
 // Pages Client
 import Auth from './pages/Client/Auth';
 import Home from './pages/Client/Home';
-import ProductDetail from './pages/Client/ProductDetail'; // Trang mới
+import ProductDetail from './pages/Client/ProductDetail'; 
 import Cart from './pages/Client/Cart';
 import Checkout from './pages/Client/Checkout';
 import Success from './pages/Client/Success'; 
 import MyOrders from './pages/Client/MyOrders';
+import PurchaseHistory from './pages/Client/PurchaseHistory';
+import Profile from './pages/Client/Profile';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* 1. NHÓM GIAO DIỆN KHÁCH HÀNG 
+        {/* ==========================================
+            1. NHÓM GIAO DIỆN KHÁCH HÀNG 
             Tất cả các trang này sẽ có Header và Footer chung từ CustomerLayout
-        */}
-        {/* path="/login": Trang đăng nhập của khách */}
-
-          <Route path="login" element={<Auth />} />
-
+        ========================================== */}
         <Route path="/" element={<CustomerLayout />}>
-          {/* path="/" index: Trang chủ hiển thị mặc định */}
+          
+          {/* Trang chủ hiển thị mặc định */}
           <Route index element={<Home />} /> 
 
           <Route path="product/:id" element={<ProductDetail />} />
-
           <Route path="cart" element={<Cart />} />
-
-          {/* path="/login": Trang đăng nhập của khách */}
-          <Route path="login" element={<Auth />} />
-
           <Route path="checkout" element={<Checkout />} />
-
           <Route path="success" element={<Success />} />
-          
           <Route path="my-orders" element={<MyOrders />} />
+          <Route path="/purchase-history" element={<PurchaseHistory />} />
+          <Route path="/myorders" element={<MyOrders />} />
+          <Route path="profile" element={<Profile />} />
 
           {/* Sau này bạn có thể thêm: 
               <Route path="products" element={<ProductList />} /> 
           */}
+          {/* 2. THÊM ĐƯỜNG DẪN CHO TRANG PROFILE */}
+          <Route path="profile" element={<Profile />} />
+
+          {/* 3. CÁC ĐƯỜNG DẪN XỬ LÝ TÀI KHOẢN (Dùng chung component Auth) */}
+          <Route path="login" element={<Auth />} />
+          <Route path="register" element={<Auth />} />
+          <Route path="forgot-password" element={<Auth />} />
+
         </Route>
 
-        {/* 2. NHÓM GIAO DIỆN ADMIN 
+        {/* ==========================================
+            2. NHÓM GIAO DIỆN ADMIN 
             Tất cả các trang này sẽ có Sidebar chung từ AdminLayout
-        */}
+        ========================================== */}
         <Route path="/admin" element={<AdminLayout />}>
-          {/* path="/admin/dashboard" */}
           <Route path="dashboard" element={<Dashboard />} />
-          
-          {/* path="/admin/products" */}
           <Route path="products" element={<ProductManagement />} />
-          
-          {/* path="/admin/orders" */}
           <Route path="orders" element={<OrderManagement />} />
-          
-          {/* path="/admin/categories" */}
           <Route path="categories" element={<CategoryManagement />} />
         </Route>
 
