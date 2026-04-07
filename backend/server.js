@@ -97,14 +97,13 @@ app.get('/api/products', (req, res) => {
     const sql = "SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.id DESC";
     db.query(sql, (err, results) => {
         if (err) return res.status(500).json(err);
-        // Thêm logic tính giá khuyến mãi nếu có discount
-        const productsWithDiscount = results.map(product => ({
+        const products = results.map(product => ({
             ...product,
-            price: product.discount ? product.price * (1 - product.discount / 100) : product.price,
-            oldPrice: product.discount ? product.price : null,
-            discount: product.discount || 0
+            discount: Number(product.discount) || 0,
+            original_price: Number(product.price),
+            discounted_price: Number(product.discount) > 0 ? Number(product.price) * (1 - Number(product.discount) / 100) : Number(product.price)
         }));
-        res.json(productsWithDiscount);
+        res.json(products);
     });
 });
 

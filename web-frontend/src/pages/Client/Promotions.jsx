@@ -36,7 +36,7 @@ const Promotions = () => {
           products.map(product => (
             <div key={product.id} style={styles.card}>
               {/* Click vào vùng thông tin để xem chi tiết */}
-              <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link to={`/product/${product.id}?from=promotions`} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div style={styles.imageBox}>
                   <img
                     src={product.image_url ? `http://localhost:5000${product.image_url}` : 'https://via.placeholder.com/250'}

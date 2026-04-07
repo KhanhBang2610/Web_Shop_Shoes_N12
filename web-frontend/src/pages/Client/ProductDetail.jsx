@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate(); 
+  const location = useLocation();
   const [product, setProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const sizes = [38, 39, 40, 41, 42, 43]; 
@@ -15,8 +16,13 @@ const ProductDetail = () => {
       .catch(err => console.error("Lỗi lấy chi tiết sản phẩm:", err));
   }, [id]);
 
-  const displayPrice = Number(product.discounted_price ?? (product.discount ? Number(product.price) * (1 - Number(product.discount) / 100) : product.price));
-  const originalPrice = Number(product.original_price ?? product.price);
+  // Kiểm tra nếu truy cập từ trang khuyến mãi
+  const isFromPromotions = location.search.includes('from=promotions');
+
+  const displayPrice = isFromPromotions && product?.discount > 0 
+    ? Number(product.discounted_price ?? product.price) 
+    : Number(product?.price ?? 0);
+  const originalPrice = Number(product?.original_price ?? product?.price ?? 0);
 
   const handleAddToCart = (isBuyNow = false) => {
     if (!selectedSize) {
@@ -31,8 +37,8 @@ const ProductDetail = () => {
       image_url: product.image_url,
       size: selectedSize,
       quantity: 1,
-      discount: Number(product.discount) || 0,
-      original_price: originalPrice
+      discount: isFromPromotions ? Number(product.discount) || 0 : 0,
+      original_price: isFromPromotions ? originalPrice : displayPrice
     };
 
     if (isBuyNow) {
@@ -73,7 +79,7 @@ const ProductDetail = () => {
           <h1 style={styles.title}>{product.name}</h1>
           <div style={styles.priceRow}>
             <p style={styles.price}>{displayPrice.toLocaleString()}đ</p>
-            {product.discount > 0 && (
+            {isFromPromotions && product.discount > 0 && (
               <p style={styles.oldPrice}>{originalPrice.toLocaleString()}đ</p>
             )}
           </div>
