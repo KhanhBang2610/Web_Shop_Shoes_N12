@@ -27,10 +27,10 @@ const Home = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '20px' }}>
       {/* Banner */}
       <div style={styles.banner}>
-        <h1 style={{ fontSize: '3.5rem', margin: 0, fontWeight: '900', letterSpacing: '-2px' }}>THỜI TRANG PHONG CÁCH</h1>
+        <h1 style={{ fontSize: '3.5rem', margin: 0, fontWeight: '800', letterSpacing: '-2px' }}>THỜI TRANG PHONG CÁCH</h1>
         <p style={{ fontSize: '1.2rem', color: '#555' }}>Khám phá bộ sưu tập giày Hot nhất 2026</p>
       </div>
 
