@@ -5,7 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// --- THÊM THƯ VIỆN CHO SOCKET.IO ---
+// Thêm thư viện cho Socket.io
 const http = require('http');
 const { Server } = require('socket.io');
 
@@ -25,14 +25,11 @@ if (!fs.existsSync(uploadDir)) {
 app.use('/uploads', express.static('uploads'));
 
 // ==========================================
-// 1.5 CẤU HÌNH SOCKET.IO (MỚI)
+// 1.5 CẤU HÌNH SOCKET.IO
 // ==========================================
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*" }
-});
+const io = new Server(server, { cors: { origin: "*" } });
 
-// Truyền io vào request để Controller có thể dùng gọi thông báo realtime
 app.use((req, res, next) => {
     req.io = io;
     next();
@@ -40,11 +37,10 @@ app.use((req, res, next) => {
 
 io.on('connection', (socket) => {
     console.log('⚡ Có client kết nối Socket:', socket.id);
-    socket.on('disconnect', () => console.log('Client ngắt kết nối Socket'));
 });
 
 // ==========================================
-// 2. KẾT NỐI DATABASE (Giữ nguyên cho các API cũ)
+// 2. KẾT NỐI DATABASE (Pool Connection)
 // ==========================================
 const db = mysql.createPool({
     host: 'localhost',
@@ -68,31 +64,32 @@ db.getConnection((err, connection) => {
 const dbPromise = db.promise();
 
 // ==========================================
-// 3. CẤU HÌNH UPLOAD FILE (Multer)
+// 3. CẤU HÌNH UPLOAD FILE (Multer) BẢO MẬT
 // ==========================================
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
-const upload = multer({ storage: storage });
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 2 * 1024 * 1024 }, // Giới hạn 2MB
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|gif/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+        if (mimetype && extname) return cb(null, true);
+        else cb(new Error('Chỉ cho phép tải lên hình ảnh!'));
+    }
+});
 
 // ==========================================
 // 4. HỆ THỐNG API
 // ==========================================
 
-// --- [USER] ĐĂNG NHẬP & ĐĂNG KÝ ---
-app.post('/api/login', (req, res) => {
-    const { email, password } = req.body;
-    db.query("SELECT id, fullname, email, role FROM users WHERE email = ? AND password = ?", [email, password], (err, results) => {
-        if (err) return res.status(500).json({ message: "Lỗi hệ thống" });
-        if (results.length > 0) res.json({ message: "Đăng nhập thành công", user: results[0] });
-        else res.status(401).json({ message: "Email hoặc mật khẩu không đúng!" });
-    });
-});
-// --- [USER & AUTH] GỌI TỪ CONTROLLER MỚI TẠO ---
-// (Đã xóa 2 API login/register cũ ở đây)
-app.use('/api', require('./routes/api'));       // Gọi file routes/api.js (chứa login, register)
-app.use('/api/user', require('./routes/user')); // Gọi file routes/user.js (chứa profile)
+// ---> GỌI ĐÚNG CONTROLLER TẠI ĐÂY (ĐÃ XÓA CODE LOGIN CŨ) <---
+app.use('/api', require('./routes/api'));       // Gọi authController (Đăng nhập, Đăng ký)
+app.use('/api/user', require('./routes/user')); // Gọi userController (Profile)
 
 
 // --- [PRODUCT] QUẢN LÝ SẢN PHẨM ---
@@ -183,7 +180,6 @@ app.delete('/api/categories/:id', (req, res) => {
 });
 
 // --- [ORDER] QUẢN LÝ ĐƠN HÀNG (ADMIN & USER) ---
-
 app.get('/api/orders', (req, res) => {
     const sql = "SELECT o.*, u.fullname as customer_name FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.order_date DESC";
     db.query(sql, (err, results) => {
@@ -276,7 +272,6 @@ app.get('/api/admin/status', (req, res) => {
 // 5. KHỞI CHẠY SERVER
 // ==========================================
 const PORT = 5000;
-// THAY ĐỔI: Chạy bằng server.listen để kích hoạt cả Express và Socket.io
 server.listen(PORT, () => {
     console.log(`=========================================`);
     console.log(`🚀 Server + Socket.io đang chạy tại: http://localhost:${PORT}`);
