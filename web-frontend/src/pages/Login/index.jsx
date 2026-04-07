@@ -8,26 +8,23 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+    const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const data = await loginAdmin({ email, password });
+        const data = await loginAdmin({ email, password });
 
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      if (data.user.role === 'admin') {
-        alert('Chào sếp!');
-        navigate('/admin/dashboard');
-      } else {
-        alert('Đăng nhập thành công!');
-        navigate('/');
-      }
-
-    } catch (err) {
-      console.error(err);
-      alert('Đăng nhập thất bại!');
+        if (data?.user?.role === 'admin') {
+            localStorage.setItem('token', data.token);
+            alert('Chào sếp! Đang vào trang quản trị...');
+            navigate('/admin/dashboard'); 
+        } else {
+            alert('Bạn không có quyền truy cập Admin!');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Đăng nhập thất bại!');
     }
-  };
+};
 
   return (
     <form onSubmit={handleLogin}>
