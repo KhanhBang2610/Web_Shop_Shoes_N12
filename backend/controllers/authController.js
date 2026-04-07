@@ -24,6 +24,19 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
+<<<<<<< HEAD
+        const [rows] = await db.execute('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
+        if (rows.length > 0) {
+            res.json({
+                message: "Đăng nhập thành công",
+                user: { 
+                    id: user.id, 
+                    email: user.email, 
+                    fullname: user.fullname, 
+                    role: user.role 
+                }
+            });
+=======
         const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
         
         if (rows.length > 0) {
@@ -47,6 +60,7 @@ exports.login = async (req, res) => {
             } else {
                 res.status(401).json({ message: "Mật khẩu không đúng" });
             }
+>>>>>>> 9eb5109a66d68cb26697e7aeea24c4ee8fc433f2
         } else {
             res.status(401).json({ message: "Email không tồn tại" });
         }

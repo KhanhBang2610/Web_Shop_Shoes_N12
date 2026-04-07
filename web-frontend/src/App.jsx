@@ -17,8 +17,13 @@ import Cart from './pages/Client/Cart';
 import Checkout from './pages/Client/Checkout';
 import Success from './pages/Client/Success'; 
 import MyOrders from './pages/Client/MyOrders';
+<<<<<<< HEAD
+import PurchaseHistory from './pages/Client/PurchaseHistory';
+import Profile from './pages/Client/Profile';
+=======
 // 1. IMPORT TRANG PROFILE VÀO ĐÂY
 import Profile from './pages/Client/Profile'; 
+>>>>>>> 9eb5109a66d68cb26697e7aeea24c4ee8fc433f2
 
 function App() {
   return (
@@ -39,6 +44,15 @@ function App() {
           <Route path="success" element={<Success />} />
           <Route path="my-orders" element={<MyOrders />} />
 
+<<<<<<< HEAD
+          <Route path="purchase-history" element={<PurchaseHistory />} />
+
+          <Route path="profile" element={<Profile />} />
+
+          {/* Sau này bạn có thể thêm: 
+              <Route path="products" element={<ProductList />} /> 
+          */}
+=======
           {/* 2. THÊM ĐƯỜNG DẪN CHO TRANG PROFILE */}
           <Route path="profile" element={<Profile />} />
 
@@ -47,6 +61,7 @@ function App() {
           <Route path="register" element={<Auth />} />
           <Route path="forgot-password" element={<Auth />} />
 
+>>>>>>> 9eb5109a66d68cb26697e7aeea24c4ee8fc433f2
         </Route>
 
         {/* ==========================================

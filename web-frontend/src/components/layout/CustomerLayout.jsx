@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const CustomerLayout = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -9,6 +10,12 @@ const CustomerLayout = () => {
   const location = useLocation();
 
   useEffect(() => {
+    const loadInitialData = () => {
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      if (storedUser) setUser(storedUser);
+    };
+
+    loadInitialData();
     const checkUser = () => {
       const storedUser = JSON.parse(localStorage.getItem('user'));
       if (storedUser) setUser(storedUser);
@@ -69,7 +76,17 @@ const CustomerLayout = () => {
           </div>
           
           <div style={styles.menu}>
-            <Link to="/" style={styles.navItem}>Trang chủ</Link>
+            
+            {user && (
+              <>
+                <Link to="/purchase-history" style={styles.navItem}>
+                  📜 Lịch sử mua
+                </Link>
+                <Link to="/profile" style={styles.navItem}>
+                  👤 Tài khoản
+                </Link>
+              </>
+            )}
             
             <Link to="/cart" style={styles.cartWrapper}>
               <span style={{ fontSize: '22px' }}>🛒</span>

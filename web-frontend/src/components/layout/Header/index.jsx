@@ -1,6 +1,12 @@
+<<<<<<< HEAD
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ShoppingCart, Search, User, History } from 'lucide-react'; // Sử dụng icon cho xịn
+=======
 // import React, { useState, useEffect } from 'react';
 // import { Link, useNavigate } from 'react-router-dom';
 // import { ShoppingCart, Search, User, LogOut } from 'lucide-react';
+>>>>>>> 9eb5109a66d68cb26697e7aeea24c4ee8fc433f2
 
 // const Header = () => {
 //   const [user, setUser] = useState(null);
@@ -41,6 +47,25 @@
 //         <li style={styles.li}><Link to="/sale" style={styles.link}>Giảm giá</Link></li>
 //       </ul>
 
+<<<<<<< HEAD
+      <div className="header-actions">
+        <div className="search-box">
+          <input type="text" placeholder="Tìm kiếm giày..." />
+          <Search size={20} />
+        </div>
+        <Link to="/cart" className="cart-icon">
+          <ShoppingCart />
+          <span className="cart-count">0</span>
+        </Link>
+        <Link to="/purchase-history" className="history-icon" title="Lịch sử mua hàng">
+          <History size={20} />
+        </Link>
+        <Link to="/profile"><User /></Link>
+      </div>
+    </nav>
+  );
+};
+=======
 //       <div className="header-actions" style={styles.headerActions}>
 //         <div className="search-box" style={styles.searchBox}>
 //           <input type="text" placeholder="Tìm kiếm giày..." style={styles.searchInput} />
@@ -51,6 +76,7 @@
 //           <ShoppingCart size={24} color="#333" />
 //           <span style={styles.cartBadge}>0</span>
 //         </Link>
+>>>>>>> 9eb5109a66d68cb26697e7aeea24c4ee8fc433f2
 
 //         {/* --- KHU VỰC USER TRỰC QUAN --- */}
 //         {user ? (
