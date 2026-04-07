@@ -80,6 +80,15 @@ const upload = multer({ storage: storage });
 // 4. HỆ THỐNG API
 // ==========================================
 
+// --- [USER] ĐĂNG NHẬP & ĐĂNG KÝ ---
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+    db.query("SELECT id, fullname, email, role FROM users WHERE email = ? AND password = ?", [email, password], (err, results) => {
+        if (err) return res.status(500).json({ message: "Lỗi hệ thống" });
+        if (results.length > 0) res.json({ message: "Đăng nhập thành công", user: results[0] });
+        else res.status(401).json({ message: "Email hoặc mật khẩu không đúng!" });
+    });
+});
 // --- [USER & AUTH] GỌI TỪ CONTROLLER MỚI TẠO ---
 // (Đã xóa 2 API login/register cũ ở đây)
 app.use('/api', require('./routes/api'));       // Gọi file routes/api.js (chứa login, register)

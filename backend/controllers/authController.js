@@ -24,33 +24,39 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
-        
+        const [rows] = await db.execute('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
         if (rows.length > 0) {
-            const user = rows[0];
-            // 2. So sánh mật khẩu đã hash
-            const match = await bcrypt.compare(password, user.password);
-            
-            if (match) {
-                // 3. Tạo Token chứa thông tin user
-                const token = jwt.sign(
-                    { id: user.id, fullname: user.fullname, role: user.role }, 
-                    JWT_SECRET, 
-                    { expiresIn: '1d' } // Token sống 1 ngày
-                );
-                
-                res.json({
-                    message: "Đăng nhập thành công",
-                    user: { id: user.id, fullname: user.fullname, role: user.role, avatar: user.avatar },
-                    token: token
-                });
-            } else {
-                res.status(401).json({ message: "Mật khẩu không đúng" });
-            }
+           res.json({
+                user: {
+                    id: user.id,
+                    fullname: user.fullname,
+                    email: user.email,
+                    phone: user.phone,
+                    address: user.address,
+                    city: user.city,
+                    role: user.role
+                }
+            });
         } else {
             res.status(401).json({ message: "Email không tồn tại" });
         }
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+};
+
+exports.updateProfile = async (req, res) => {
+  const { fullname, phone, address, city } = req.body;
+  const { id } = req.params;
+
+  try {
+    await db.execute(
+      `UPDATE users SET fullname=?, phone=?, address=?, city=? WHERE id=?`,
+      [fullname, phone, address, city, id]
+    );
+
+    res.json({ message: "Cập nhật thành công" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };

@@ -90,6 +90,19 @@ body {
   color: var(--primary-black);
 }
 
+.history-icon {
+  color: var(--primary-black);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-icon:hover {
+  color: var(--accent-orange);
+  transform: scale(1.1);
+}
+
 .cart-count {
   position: absolute;
   top: -8px;

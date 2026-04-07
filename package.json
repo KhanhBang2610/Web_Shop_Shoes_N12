@@ -1,0 +1,33 @@
+{
+  "name": "web_shop_shoes_n12",
+  "version": "1.0.0",
+  "description": "Cấu trúc web:\r frontend/ (src/)\r ├── assets/                  # Tài nguyên tĩnh\r │   ├── images/              # Banner bộ sưu tập, Logo Brand\r │   ├── icons/               # Icon thước đo, chất liệu\r │   └── size-charts/         # Ảnh bảng quy đổi size (EU, US, UK)\r ├── api/                     # Quản lý gọi API\r │   ├── productApi.js        # Lọc theo Size, Thương hiệu, Màu sắc\r │   └── brandApi.js          # Lấy danh sách hãng giày\r ├── components/              # Thành phần giao diện\r │   ├── common/              # Dùng chung (Modal, ShoeCard)\r │   └── features/            # Theo nghiệp vụ (SizePicker, Tracking)\r ├── constants/               # Hằng số (Bảng size chuẩn 36-45)\r ├── hooks/                   # Custom hooks (useInventory)\r └── pages/                   # Các trang chính (BrandPage, SizeGuide)",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bangptk/Web_Shop_Shoes_N12.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Bangptk/Web_Shop_Shoes_N12/issues"
+  },
+  "homepage": "https://github.com/Bangptk/Web_Shop_Shoes_N12#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.7.0",
+    "multer": "^2.1.1",
+    "mysql2": "^3.20.0",
+    "react-router-dom": "^7.14.0",
+    "socket.io": "^4.8.3"
+  }
+}
