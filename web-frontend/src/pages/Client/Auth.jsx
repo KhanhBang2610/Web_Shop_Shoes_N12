@@ -9,6 +9,9 @@ const Auth = () => {
     const [view, setView] = useState('login'); 
     const [formData, setFormData] = useState({ fullname: '', email: '', password: '' });
     const [errors, setErrors] = useState({});
+    
+    // STATE MỚI: Dùng để điều khiển hiển thị thông báo mượt mà (Toast)
+    const [toastMessage, setToastMessage] = useState(null);
 
     useEffect(() => {
         if (location.pathname.includes('/register')) setView('register');
@@ -16,10 +19,13 @@ const Auth = () => {
         else setView('login');
         
         setErrors({});
-        setFormData({ fullname: '', email: '', password: '' });
+        setFormData(prev => ({ 
+            fullname: '', 
+            email: prev.email, 
+            password: ''       
+        }));
     }, [location.pathname]);
 
-    // HÀM KIỂM TRA LỖI RIÊNG LẺ TỪNG TRƯỜNG
     const validateField = (name, value, currentView) => {
         let errorMsg = '';
         if (name === 'fullname' && currentView === 'register') {
@@ -41,14 +47,12 @@ const Auth = () => {
         return errorMsg;
     };
 
-    // Khi người dùng RỜI KHỎI ô nhập liệu (Nhập xong) -> Báo lỗi ngay lập tức
     const handleBlur = (e) => {
         const { name, value } = e.target;
         const errorMsg = validateField(name, value, view);
         setErrors(prev => ({ ...prev, [name]: errorMsg }));
     };
 
-    // Khi người dùng BẮT ĐẦU GÕ LẠI -> Ẩn lỗi đi cho đỡ phiền
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -60,7 +64,6 @@ const Auth = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Kiểm tra lại toàn bộ trước khi gửi API
         let newErrors = {};
         if (view === 'register') newErrors.fullname = validateField('fullname', formData.fullname, view);
         newErrors.email = validateField('email', formData.email, view);
@@ -78,15 +81,30 @@ const Auth = () => {
                     email: formData.email,
                     password: formData.password
                 });
+                
                 localStorage.setItem('user', JSON.stringify(res.data.user));
                 localStorage.setItem('token', res.data.token); 
-                if (res.data.user.role === 'admin') navigate('/admin/dashboard');
-                else navigate('/'); 
                 window.dispatchEvent(new Event('storage'));
+
+                // HIỂN THỊ TOAST VÀ ĐỢI 1.5 GIÂY RỒI MỚI CHUYỂN TRANG
+                setToastMessage("🎉 Đăng nhập thành công!");
+                setTimeout(() => {
+                    if (res.data.user.role === 'admin') navigate('/admin/dashboard');
+                    else navigate('/'); 
+                }, 1500);
+
             } else if (view === 'register') {
-                await axios.post('http://localhost:5000/api/register', formData);
-                alert("Đăng ký thành công! Hãy đăng nhập nhé.");
-                navigate('/login');
+                const res = await axios.post('http://localhost:5000/api/register', formData);
+                
+                localStorage.setItem('user', JSON.stringify(res.data.user));
+                localStorage.setItem('token', res.data.token);
+                window.dispatchEvent(new Event('storage'));
+
+                // HIỂN THỊ TOAST VÀ ĐỢI 1.5 GIÂY RỒI MỚI CHUYỂN TRANG
+                setToastMessage("✨ Chào mừng! Bạn đã đăng ký thành công.");
+                setTimeout(() => {
+                    navigate('/'); 
+                }, 1500);
             }
         } catch (error) {
             const serverMsg = error.response?.data?.message || "Lỗi hệ thống!";
@@ -98,11 +116,25 @@ const Auth = () => {
 
     return (
         <div style={styles.container}>
+            {/* THÊM CSS ANIMATION CHO TOAST TRƯỢT TỪ TRÊN XUỐNG */}
             <style>{`
                 .auth-input:focus { border-color: #e67e22 !important; box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.2); }
                 .auth-btn:hover { background-color: #d35400 !important; transform: translateY(-2px); }
                 .auth-link:hover { text-decoration: underline; }
+                
+                @keyframes slideDown {
+                    from { opacity: 0; transform: translateY(-20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
             `}</style>
+
+            {/* HIỂN THỊ THÔNG BÁO TOAST Ở GÓC MÀN HÌNH */}
+            {toastMessage && (
+                <div style={styles.toast}>
+                    {toastMessage}
+                </div>
+            )}
+
             <div style={styles.card}>
                 <div style={styles.imageSection}>
                     <div style={styles.overlay}>
@@ -147,7 +179,17 @@ const Auth = () => {
                                     </div>
 
                                     <div style={styles.inputGroup}>
-                                        <input type="password" name="password" placeholder="Mật khẩu" className="auth-input" style={errors.password ? {...styles.input, ...styles.inputError} : styles.input} onChange={handleInputChange} onBlur={handleBlur} />
+                                        <input 
+                                            type="password" 
+                                            name="password" 
+                                            placeholder="Mật khẩu" 
+                                            autoComplete="new-password"
+                                            value={formData.password}
+                                            className="auth-input" 
+                                            style={errors.password ? {...styles.input, ...styles.inputError} : styles.input} 
+                                            onChange={handleInputChange} 
+                                            onBlur={handleBlur} 
+                                        />
                                         {errors.password && <div style={styles.errorText}>{errors.password}</div>}
                                     </div>
                                     
@@ -173,7 +215,7 @@ const Auth = () => {
 };
 
 const styles = {
-    container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#eef2f5', padding: '20px' },
+    container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#eef2f5', padding: '20px', position: 'relative' },
     card: { display: 'flex', background: '#fff', borderRadius: '20px', boxShadow: '0 15px 35px rgba(0,0,0,0.1)', width: '100%', maxWidth: '900px', overflow: 'hidden', minHeight: '500px' },
     imageSection: { flex: 1, backgroundImage: 'url(https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop)', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', display: 'flex', alignItems: 'flex-end' },
     overlay: { background: 'linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0))', padding: '40px', width: '100%', color: 'white' },
@@ -188,14 +230,32 @@ const styles = {
     inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
     input: { padding: '15px', borderRadius: '10px', border: '1px solid #e1e1e1', fontSize: '15px', outline: 'none', transition: 'all 0.3s ease', backgroundColor: '#f9f9f9', width: '100%', boxSizing: 'border-box' },
     inputError: { border: '1px solid #c0392b', backgroundColor: '#fdf3f2' },
-    // MÀU LỖI IN ĐẬM RÕ RÀNG
     errorText: { color: '#c0392b', fontSize: '13px', fontWeight: 'bold', marginTop: '4px', textAlign: 'left', display: 'block' },
     serverError: { padding: '10px', backgroundColor: '#fdf3f2', border: '1px solid #fadbd8', color: '#c0392b', borderRadius: '8px', fontSize: '14px', textAlign: 'center', marginBottom: '15px', fontWeight: 'bold' },
 
     forgotPassword: { textAlign: 'right', fontSize: '13px', color: '#e67e22', cursor: 'pointer', marginTop: '-5px', fontWeight: '500', textDecoration: 'none' },
     button: { padding: '15px', borderRadius: '10px', border: 'none', background: '#e67e22', color: '#fff', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s ease', boxShadow: '0 4px 15px rgba(230, 126, 34, 0.3)', marginTop: '5px' },
     switchText: { marginTop: '25px', fontSize: '15px', color: '#666', textAlign: 'center' },
-    link: { color: '#e67e22', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s', textDecoration: 'none', marginLeft: '5px' }
+    link: { color: '#e67e22', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.2s', textDecoration: 'none', marginLeft: '5px' },
+
+    // CSS CHO TOAST XỊN XÒ
+    toast: {
+        position: 'fixed',
+        top: '30px',
+        right: '30px',
+        backgroundColor: '#27ae60', // Màu xanh lá báo thành công
+        color: '#fff',
+        padding: '16px 24px',
+        borderRadius: '10px',
+        boxShadow: '0 8px 25px rgba(39, 174, 96, 0.3)',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        zIndex: 9999,
+        animation: 'slideDown 0.4s ease-out forwards', // Gọi animation vừa tạo
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+    }
 };
 
 export default Auth;

@@ -1,27 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { ShoppingCart, Search, User, LogOut, Package, History, ChevronDown } from 'lucide-react';
 
 const CustomerLayout = () => {
   const [cartCount, setCartCount] = useState(0);
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState(""); 
+  
+  // Quản lý việc ẩn/hiện menu dropdown
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null); 
+
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const loadInitialData = () => {
-      const storedUser = JSON.parse(localStorage.getItem('user'));
-      if (storedUser) setUser(storedUser);
-    };
-
-    loadInitialData();
     const checkUser = () => {
       const storedUser = JSON.parse(localStorage.getItem('user'));
       if (storedUser) setUser(storedUser);
       else setUser(null);
     };
-    
     checkUser();
 
     const updateCartCount = () => {
@@ -29,17 +27,25 @@ const CustomerLayout = () => {
       const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
       setCartCount(totalItems);
     };
-
     updateCartCount();
     
-    // Lắng nghe thay đổi từ localStorage (cập nhật ngay khi đổi avatar/tên)
     window.addEventListener('storage', () => {
         checkUser();
         updateCartCount();
     });
+
+    // Bắt sự kiện click ra ngoài để tự động đóng dropdown
+    const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setIsDropdownOpen(false);
+        }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
         window.removeEventListener('storage', checkUser);
         window.removeEventListener('storage', updateCartCount);
+        document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [location]);
 
@@ -54,6 +60,7 @@ const CustomerLayout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     setUser(null);
+    setIsDropdownOpen(false); 
     navigate('/');
   };
 
@@ -61,8 +68,19 @@ const CustomerLayout = () => {
     <div>
       <nav style={styles.header}>
         <div style={styles.container}>
+            
+          {/* LOGO & MAIN LINKS (Gộp từ file của Vũ) */}
           <div style={styles.leftSection}>
             <Link to="/" style={styles.logo}>👟 SHOES STORE</Link>
+            <ul style={styles.navLinks}>
+              <li><Link to="/shop" style={styles.link}>Cửa hàng</Link></li>
+              <li><Link to="/brands" style={styles.link}>Thương hiệu</Link></li>
+              <li><Link to="/sale" style={styles.link}>Giảm giá</Link></li>
+            </ul>
+          </div>
+          
+          <div style={styles.rightSection}>
+            {/* THANH TÌM KIẾM */}
             <form onSubmit={handleSearch} style={styles.searchBar}>
               <input 
                 type="text" 
@@ -71,21 +89,12 @@ const CustomerLayout = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={styles.searchInput}
               />
-              <button type="submit" style={styles.searchBtn}>🔍</button>
+              <button type="submit" style={styles.searchBtn}>
+                  <Search size={18} color="#666" />
+              </button>
             </form>
-          </div>
-          
-          <div style={styles.menu}>
-            <div style={styles.navGroup}>
-              {/* Nút Giỏ hàng */}
-              <Link to="/cart" style={styles.navLink}>
-                <div style={styles.iconWrapper}>
-                  <span style={{ fontSize: '22px' }}>🛒</span>
-                  {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
-                </div>
-                <span>Giỏ hàng</span>
-              </Link>
 
+<<<<<<< HEAD
               {/* Nút Khuyến mãi */}
               <Link to="/promotions" style={styles.navLink}>
                 <span style={{ fontSize: '22px' }}>🏷️</span>
@@ -97,29 +106,47 @@ const CustomerLayout = () => {
                 <span style={{ fontSize: '22px' }}>📜</span>
                 <span>Lịch sử</span>
               </Link>
+=======
+            {/* GIỎ HÀNG */}
+            <Link to="/cart" style={styles.cartWrapper}>
+              <ShoppingCart size={24} color="#333" />
+              {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
+            </Link>
+>>>>>>> c4ffe714c96b3aea475d6150d2b95a62fd75d878
 
-              {/* Nút Đơn hàng */}
-              <Link to="/orders" style={styles.navLink}>
-                <span style={{ fontSize: '22px' }}>📦</span>
-                <span>Đơn hàng</span>
-              </Link>
-            </div>
+            {/* KHU VỰC USER (DROPDOWN) */}
             <div style={styles.authSection}>
               {user ? (
-                <>
-                  <span style={styles.welcomeText}>Chào,</span>
-                  {/* --- CỤM AVATAR + TÊN USER (CLICK VÀO PROFILE) --- */}
-                  <Link to="/profile" style={styles.profileLink}>
+                <div style={styles.dropdownContainer} ref={dropdownRef}>
+                  <div style={styles.userTrigger} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                     {user.avatar ? (
                         <img src={`http://localhost:5000${user.avatar}`} alt="Avatar" style={styles.headerAvatar} />
                     ) : (
-                        <div style={styles.headerAvatarPlaceholder}>👤</div>
+                        <div style={styles.headerAvatarPlaceholder}><User size={16} color="#666" /></div>
                     )}
                     <span style={styles.userName}>{user.fullname}</span>
-                  </Link>
-                  {/* ------------------------------------------------ */}
-                  <button onClick={handleLogout} style={styles.logoutBtn}>Đăng xuất</button>
-                </>
+                    <ChevronDown size={14} color="#666" />
+                  </div>
+
+                  {/* MENU THẢ XUỐNG CÁC TÍNH NĂNG */}
+                  {isDropdownOpen && (
+                      <div style={styles.dropdownMenu}>
+                          <Link to="/profile" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
+                              <User size={16} /> Thông tin tài khoản
+                          </Link>
+                          <Link to="/orders" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
+                              <Package size={16} /> Đơn hàng của tôi
+                          </Link>
+                          <Link to="/purchase-history" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
+                              <History size={16} /> Lịch sử mua hàng
+                          </Link>
+                          <div style={styles.divider}></div>
+                          <button onClick={handleLogout} style={styles.dropdownItemLogout}>
+                              <LogOut size={16} /> Đăng xuất
+                          </button>
+                      </div>
+                  )}
+                </div>
               ) : (
                 <Link to="/login" style={styles.loginLink}>Đăng nhập</Link>
               )}
@@ -128,7 +155,7 @@ const CustomerLayout = () => {
         </div>
       </nav>
       
-      <main style={{ minHeight: '80vh' }}>
+      <main style={{ minHeight: '80vh', backgroundColor: '#fdfdfd' }}>
         <Outlet />
       </main>
     </div>
@@ -138,28 +165,33 @@ const CustomerLayout = () => {
 const styles = {
   header: { background: '#fff', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', position: 'sticky', top: 0, zIndex: 100 },
   container: { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px' },
-  leftSection: { display: 'flex', alignItems: 'center', gap: '30px', flex: 1 },
+  
+  leftSection: { display: 'flex', alignItems: 'center', gap: '30px' },
   logo: { fontSize: '20px', fontWeight: 'bold', textDecoration: 'none', color: '#333', whiteSpace: 'nowrap' },
-  searchBar: { display: 'flex', alignItems: 'center', background: '#f1f2f6', borderRadius: '20px', padding: '5px 15px', width: '300px' },
-  searchInput: { border: 'none', background: 'transparent', outline: 'none', padding: '8px', fontSize: '14px', width: '100%' },
-  searchBtn: { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '16px' },
-  menu: { display: 'flex', gap: '20px', alignItems: 'center' },
-  navItem: { textDecoration: 'none', color: '#555', fontWeight: '500', fontSize: '14px' },
-  navGroup: { display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '25px', marginRight: '20px' },
-  navLink: { display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: '#555', fontWeight: '500', fontSize: '14px' },
-  iconWrapper: { position: 'relative' },
-  cartBadge: { position: 'absolute', top: '-8px', right: '-10px', background: '#e74c3c', color: '#fff', fontSize: '10px', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontWeight: 'bold' },
-  authSection: { display: 'flex', alignItems: 'center', gap: '8px', borderLeft: '1px solid #eee', paddingLeft: '15px' },
-  welcomeText: { fontSize: '14px', color: '#555' },
+  navLinks: { display: 'flex', listStyle: 'none', gap: '20px', margin: 0, padding: 0 },
+  link: { textDecoration: 'none', color: '#555', fontWeight: '600', fontSize: '15px', transition: 'color 0.2s' },
   
-  // STYLE CHO AVATAR VÀ TÊN Ở HEADER
-  profileLink: { display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '20px', transition: 'background 0.2s' },
-  headerAvatar: { width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #ddd' },
-  headerAvatarPlaceholder: { width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#e9ecef', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '16px', border: '1px solid #ddd' },
-  userName: { fontWeight: 'bold', color: '#e67e22', fontSize: '14px' },
+  rightSection: { display: 'flex', alignItems: 'center', gap: '20px' },
+  searchBar: { display: 'flex', alignItems: 'center', background: '#f1f2f6', borderRadius: '20px', padding: '6px 15px', width: '250px' },
+  searchInput: { border: 'none', background: 'transparent', outline: 'none', padding: '5px', fontSize: '14px', width: '100%' },
+  searchBtn: { border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center' },
   
-  logoutBtn: { background: 'none', border: '1px solid #e74c3c', color: '#e74c3c', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s', marginLeft: '5px' },
-  loginLink: { textDecoration: 'none', color: '#fff', background: '#e67e22', padding: '8px 15px', borderRadius: '20px', fontWeight: 'bold', fontSize: '14px' }
+  cartWrapper: { position: 'relative', textDecoration: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' },
+  cartBadge: { position: 'absolute', top: '-6px', right: '-8px', background: '#e74c3c', color: '#fff', fontSize: '10px', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontWeight: 'bold' },
+  authSection: { borderLeft: '1px solid #eee', paddingLeft: '15px' },
+  loginLink: { textDecoration: 'none', color: '#fff', background: '#e67e22', padding: '8px 18px', borderRadius: '20px', fontWeight: 'bold', fontSize: '14px' },
+
+  // --- STYLES CHO DROPDOWN MENU CHUYÊN NGHIỆP ---
+  dropdownContainer: { position: 'relative' },
+  userTrigger: { display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '5px 10px', borderRadius: '20px', backgroundColor: '#f9f9f9', border: '1px solid #eee', transition: 'background 0.2s' },
+  headerAvatar: { width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' },
+  headerAvatarPlaceholder: { width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#e9ecef', display: 'flex', justifyContent: 'center', alignItems: 'center' },
+  userName: { fontWeight: '600', color: '#333', fontSize: '14px' },
+  
+  dropdownMenu: { position: 'absolute', top: '115%', right: 0, backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', width: '200px', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #eee', zIndex: 101 },
+  dropdownItem: { display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 15px', textDecoration: 'none', color: '#333', fontSize: '14px', transition: 'background 0.2s', fontWeight: '500' },
+  divider: { height: '1px', backgroundColor: '#eee', margin: '0' },
+  dropdownItemLogout: { display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 15px', color: '#e74c3c', fontSize: '14px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', width: '100%', fontWeight: '600' }
 };
 
 export default CustomerLayout;

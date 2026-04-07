@@ -8,6 +8,10 @@ const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState({}); 
+    
+    // STATE MỚI: Quản lý thông báo thành công giữa màn hình
+    const [successMessage, setSuccessMessage] = useState(null);
+    
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -61,8 +65,8 @@ const Profile = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                setErrors({ ...errors, avatar: "File ảnh quá lớn! Vui lòng chọn ảnh dưới 5MB." });
+            if (file.size > 2 * 1024 * 1024) {
+                setErrors({ ...errors, avatar: "File ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB." });
                 e.target.value = ''; 
                 setAvatarFile(null);
                 return;
@@ -111,7 +115,12 @@ const Profile = () => {
             localStorage.setItem('user', JSON.stringify(updatedUser));
             window.dispatchEvent(new Event('storage'));
 
-            alert('Cập nhật thông tin thành công!');
+            // THAY ĐỔI: Kích hoạt Modal thành công giữa màn hình thay vì alert
+            setSuccessMessage('Cập nhật thông tin thành công!');
+            setTimeout(() => {
+                setSuccessMessage(null); // Tự động tắt sau 2 giây
+            }, 1000);
+
             setIsEditing(false);
             setAvatarFile(null); 
             loadProfile(); 
@@ -132,6 +141,24 @@ const Profile = () => {
 
     return (
         <div style={styles.container}>
+            {/* THÊM STYLE CHO ANIMATION POP-UP */}
+            <style>{`
+                @keyframes popIn {
+                    0% { transform: scale(0.8); opacity: 0; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+            `}</style>
+
+            {/* KHU VỰC HIỂN THỊ MODAL THÀNH CÔNG GIỮA MÀN HÌNH */}
+            {successMessage && (
+                <div style={styles.modalOverlay}>
+                    <div style={styles.successModal}>
+                        <div style={styles.successIcon}>✓</div>
+                        <h3 style={styles.successText}>{successMessage}</h3>
+                    </div>
+                </div>
+            )}
+
             <div style={styles.card}>
                 <h2 style={styles.title}>THÔNG TIN CÁ NHÂN</h2>
 
@@ -206,7 +233,7 @@ const Profile = () => {
 };
 
 const styles = {
-    container: { minHeight: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f9f9f9', padding: '40px 20px' },
+    container: { minHeight: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f9f9f9', padding: '40px 20px', position: 'relative' },
     card: { backgroundColor: 'white', borderRadius: '15px', padding: '40px', boxShadow: '0 8px 30px rgba(0,0,0,0.08)', width: '100%', maxWidth: '700px' },
     title: { textAlign: 'center', marginBottom: '30px', color: '#2c3e50', fontSize: '26px', fontWeight: '800', borderBottom: '2px solid #eee', paddingBottom: '15px' },
     form: { display: 'flex', flexDirection: 'column' },
@@ -234,7 +261,48 @@ const styles = {
     avatarContainer: { display: 'flex', justifyContent: 'center', position: 'relative' },
     avatarImage: { width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '4px solid #fff', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' },
     avatarPlaceholder: { width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#f1f2f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a4b0be', border: '2px dashed #ced6e0', fontSize: '40px' },
-    fileInput: { fontSize: '14px', color: '#555' }
+    fileInput: { fontSize: '14px', color: '#555' },
+
+    // CSS CHO MODAL THÔNG BÁO GIỮA MÀN HÌNH
+    modalOverlay: {
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)', // Làm tối mờ nền
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 9999
+    },
+    successModal: {
+        backgroundColor: '#fff',
+        padding: '30px 50px',
+        borderRadius: '16px',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '15px',
+        animation: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards' // Hiệu ứng nảy nhẹ
+    },
+    successIcon: {
+        width: '60px', 
+        height: '60px',
+        backgroundColor: '#2ecc71',
+        color: 'white',
+        borderRadius: '50%',
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        fontSize: '32px', 
+        fontWeight: 'bold',
+        boxShadow: '0 4px 15px rgba(46, 204, 113, 0.3)'
+    },
+    successText: {
+        fontSize: '18px', 
+        color: '#2c3e50', 
+        fontWeight: 'bold', 
+        margin: 0
+    }
 };
 
 export default Profile;

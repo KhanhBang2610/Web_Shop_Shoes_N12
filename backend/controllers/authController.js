@@ -8,14 +8,37 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 exports.register = async (req, res) => {
     const { fullname, email, password, role } = req.body;
     try {
-        // 1. Hash mật khẩu (10 vòng lặp)
+        // 1. Hash mật khẩu
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        await db.execute(
+        // 2. Thực hiện chèn người dùng mới
+        const [result] = await db.execute(
             'INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)',
             [fullname, email, hashedPassword, role || 'customer']
         );
-        res.status(201).json({ message: "Đăng ký thành công!" });
+
+        // 3. Lấy ID vừa tạo để tạo Token cho User mới
+        const userId = result.insertId;
+        const userRole = role || 'customer';
+
+        const token = jwt.sign(
+            { id: userId, fullname: fullname, role: userRole }, 
+            JWT_SECRET, 
+            { expiresIn: '1d' }
+        );
+
+        // 4. Trả về thông tin user và token để Frontend đăng nhập luôn
+        res.status(201).json({ 
+            message: "Đăng ký và đăng nhập thành công!",
+            user: {
+                id: userId,
+                fullname: fullname,
+                email: email,
+                role: userRole,
+                avatar: null // User mới chưa có avatar
+            },
+            token: token 
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
