@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { getCart, saveCart } from '../../utils/cartUtils';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -44,7 +45,7 @@ const ProductDetail = () => {
     if (isBuyNow) {
       navigate('/checkout', { state: { buyNowItem: currentItem } });
     } else {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cart = getCart();
       const existingIndex = cart.findIndex(item => 
         item.id === product.id && String(item.size) === String(selectedSize)
       );
@@ -55,8 +56,7 @@ const ProductDetail = () => {
         cart.push(currentItem);
       }
 
-      localStorage.setItem('cart', JSON.stringify(cart));
-      window.dispatchEvent(new Event('storage'));
+      saveCart(cart);
       alert(`Đã thêm ${product.name} (Size: ${selectedSize}) vào giỏ hàng!`);
     }
   };

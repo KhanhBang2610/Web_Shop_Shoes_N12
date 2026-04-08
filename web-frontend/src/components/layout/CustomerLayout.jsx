@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, Search, User, LogOut, Package, History, ChevronDown } from 'lucide-react';
+import { getCart } from '../../utils/cartUtils';
 
 const CustomerLayout = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -23,7 +24,7 @@ const CustomerLayout = () => {
     checkUser();
 
     const updateCartCount = () => {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cart = getCart();
       const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
       setCartCount(totalItems);
     };

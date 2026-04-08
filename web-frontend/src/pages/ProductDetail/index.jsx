@@ -2,18 +2,49 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import productApi from '../../api/productApi';
-import { useCart } from '../../contexts/CartContext';
+import { getCart, saveCart } from '../../utils/cartUtils';
 import SizePicker from '../../components/features/product-detail/SizePicker';
 import ColorSelector from '../../components/features/product-detail/ColorSelector';
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const { addToCart } = useCart();
   
   const [product, setProduct] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
+
+  // Hàm thêm vào giỏ hàng
+  const addToCart = (product, selectedColor, selectedSize, quantity) => {
+    if (!selectedSize) {
+      alert("Vui lòng chọn Size giày trước khi tiếp tục!");
+      return;
+    }
+
+    const currentItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image_url: product.image_main,
+      size: selectedSize,
+      quantity: quantity,
+      color: selectedColor
+    };
+
+    const cart = getCart();
+    const existingIndex = cart.findIndex(item => 
+      item.id === product.id && String(item.size) === String(selectedSize)
+    );
+
+    if (existingIndex > -1) {
+      cart[existingIndex].quantity += quantity;
+    } else {
+      cart.push(currentItem);
+    }
+
+    saveCart(cart);
+    alert(`Đã thêm ${product.name} (Size: ${selectedSize}) vào giỏ hàng!`);
+  };
 
   // Lấy dữ liệu từ MySQL thông qua API
   useEffect(() => {
