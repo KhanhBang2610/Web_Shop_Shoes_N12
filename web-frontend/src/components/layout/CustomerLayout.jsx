@@ -92,7 +92,19 @@ const CustomerLayout = () => {
               </button>
             </form>
             <ul style={styles.navLinks}>
-              <li><Link to="/brands" style={styles.link}><span>🌟</span>Thương hiệu</Link></li>
+              <li>
+                <NavLink 
+                  to="/brands" 
+                  style={({ isActive }) => ({
+                    textDecoration: 'none',
+                    color: isActive ? '#e67e22' : '#333',
+                    fontWeight: 'normal'
+                  })}
+                >
+                  <span>🌟</span>
+                  <span>Thương hiệu</span>
+                </NavLink>
+              </li>
             </ul>
           </div>
           
