@@ -13,7 +13,7 @@ const Cart = () => {
   };
 
   useEffect(() => {
-    loadCart();
+    loadCart(); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
   // Hàm thay đổi số lượng

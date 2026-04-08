@@ -7,21 +7,21 @@ const DiscountManagement = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [discountValue, setDiscountValue] = useState(0);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
   const fetchProducts = () => {
     axios.get('http://localhost:5000/api/products')
       .then(res => {
         setProducts(res.data.data);
         setLoading(false);
       })
-      .catch(err => {
-        console.error("Lỗi lấy danh sách sản phẩm:", err);
+      .catch(error => {
+        console.error("Lỗi lấy sản phẩm:", error);
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const handleSetDiscount = async (productId) => {
     try {
@@ -32,8 +32,8 @@ const DiscountManagement = () => {
       fetchProducts(); // Refresh danh sách
       setSelectedProduct(null);
       setDiscountValue(0);
-    } catch (err) {
-      console.error("Lỗi cập nhật giảm giá:", err);
+    } catch (error) {
+      console.error("Lỗi cập nhật giảm giá:", error);
       alert("Lỗi cập nhật giảm giá!");
     }
   };
@@ -45,8 +45,8 @@ const DiscountManagement = () => {
       });
       alert("Đã xóa giảm giá!");
       fetchProducts();
-    } catch (err) {
-      console.error("Lỗi xóa giảm giá:", err);
+    } catch (error) {
+      console.error("Lỗi xóa giảm giá:", error);
       alert("Lỗi xóa giảm giá!");
     }
   };

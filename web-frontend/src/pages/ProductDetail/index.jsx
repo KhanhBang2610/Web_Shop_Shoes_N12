@@ -50,7 +50,7 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         const res = await productApi.getDetail(id);
-        const data = res.data;
+        const data = res.data.data;
 
         setProduct(data);
 

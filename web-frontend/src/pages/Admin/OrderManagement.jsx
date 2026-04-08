@@ -6,21 +6,21 @@ const OrderManagement = () => {
   const [selectedOrderDetails, setSelectedOrderDetails] = useState([]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
   const fetchOrders = () => {
     axios.get('http://localhost:5000/api/orders')
       .then(res => setOrders(res.data.data))
-      .catch(err => console.error("Lỗi lấy danh sách đơn hàng:", err));
+      .catch(error => console.error("Lỗi lấy danh sách đơn hàng:", error));
   };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   const updateStatus = async (id, newStatus) => {
     try {
       await axios.put(`http://localhost:5000/api/orders/${id}/status`, { status: newStatus });
       fetchOrders();
-    } catch (error) {
+    } catch {
       alert("Lỗi cập nhật trạng thái!");
     }
   };
@@ -30,7 +30,7 @@ const OrderManagement = () => {
       const res = await axios.get(`http://localhost:5000/api/orders/${orderId}/details`);
       setSelectedOrderDetails(res.data.data);
       setShowDetailsModal(true);
-    } catch (error) {
+    } catch {
       alert("Không thể lấy chi tiết đơn hàng này!");
     }
   };

@@ -12,22 +12,22 @@ const ProductManagement = () => {
   });
   const [isEdit, setIsEdit] = useState(false);
 
-  useEffect(() => { 
-    fetchProducts(); 
-    fetchCategories(); 
-  }, []);
-
   const fetchProducts = () => {
     axios.get('http://localhost:5000/api/products')
       .then(res => setProducts(res.data.data))
-      .catch(err => console.error("Lỗi lấy danh sách sản phẩm:", err));
+      .catch(error => console.error("Lỗi lấy danh sách sản phẩm:", error));
   };
 
   const fetchCategories = () => {
     axios.get('http://localhost:5000/api/categories')
       .then(res => setCategories(res.data.data))
-      .catch(err => console.error("Lỗi lấy danh mục:", err));
+      .catch(error => console.error("Lỗi lấy danh mục:", error));
   };
+
+  useEffect(() => { 
+    fetchProducts(); 
+    fetchCategories(); 
+  }, []);
 
   const handleOpenAdd = () => {
     setCurrentProduct({ id: null, name: '', price: '', description: '', category_id: '' });
@@ -60,7 +60,7 @@ const ProductManagement = () => {
       }
       setShowModal(false);
       fetchProducts();
-    } catch (error) {
+    } catch {
       alert("Lỗi thao tác!");
     }
   };

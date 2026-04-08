@@ -6,19 +6,19 @@ const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
 
-  // 2. Gọi API khi trang load
-  useEffect(() => { 
-    fetchCategories(); 
-  }, []);
-
   const fetchCategories = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/categories');
       setCategories(res.data.data);
-    } catch (err) {
-      console.error("Lỗi lấy danh mục:", err);
+    } catch {
+      console.error("Lỗi thêm danh mục");
     }
   };
+
+  // 2. Gọi API khi trang load
+  useEffect(() => { 
+    fetchCategories(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
 
   // 3. Hàm thêm danh mục
   const handleAdd = async () => {
@@ -27,8 +27,8 @@ const CategoryManagement = () => {
       await axios.post('http://localhost:5000/api/categories', newCategory);
       setNewCategory({ name: '', description: '' }); // Xóa trắng ô input sau khi thêm
       fetchCategories(); // Load lại danh sách
-    } catch (err) {
-      alert("Lỗi khi thêm danh mục!");
+    } catch {
+      console.error("Lỗi thêm danh mục");
     }
   };
 
@@ -38,7 +38,7 @@ const CategoryManagement = () => {
       try {
         await axios.delete(`http://localhost:5000/api/categories/${id}`);
         fetchCategories();
-      } catch (err) {
+      } catch {
         alert("Không thể xóa danh mục này (có thể đang có sản phẩm thuộc danh mục này)");
       }
     }

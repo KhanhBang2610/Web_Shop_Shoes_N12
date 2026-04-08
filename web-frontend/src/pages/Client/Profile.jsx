@@ -119,7 +119,7 @@ const Profile = () => {
                 phone: profile.phone,
                 address: profile.address,
                 city: profile.city,
-                avatar: res.avatar || profile.avatar
+                avatar: res.data.avatar || profile.avatar
                 };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             window.dispatchEvent(new Event('storage'));
