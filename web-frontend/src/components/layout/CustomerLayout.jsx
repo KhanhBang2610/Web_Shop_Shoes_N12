@@ -166,7 +166,7 @@ const CustomerLayout = () => {
                           <Link to="/profile" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
                               <User size={16} /> Thông tin tài khoản
                           </Link>
-                          <Link to="/orders" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
+                          <Link to="/my-orders" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
                               <Package size={16} /> Đơn hàng của tôi
                           </Link>
                           <Link to="/purchase-history" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>

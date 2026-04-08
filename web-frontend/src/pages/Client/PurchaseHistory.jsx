@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { getCart, saveCart } from '../../utils/cartUtils';
 
 const PurchaseHistory = () => {
   const [completedOrders, setCompletedOrders] = useState([]);
-  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
-  const [activeOrderId, setActiveOrderId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
   
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // 1. Lấy danh sách đơn hàng đã hoàn thành
+  // 1. Lấy danh sách đơn hàng đã hoàn thành (delivered)
   useEffect(() => {
-    if (user && user.id) {
+    if (user?.id) {
       axios.get(`http://localhost:5000/api/orders/user/${user.id}`)
         .then(res => {
-          // Lọc chỉ các đơn hàng có status là 'delivered'
+          // Lọc chỉ lấy những đơn đã giao thành công
           const completed = res.data.filter(order => order.status === 'delivered');
           setCompletedOrders(completed);
           setLoading(false);
@@ -28,303 +24,137 @@ const PurchaseHistory = () => {
           setLoading(false);
         });
     }
-  }, [user]);
-
-  // 2. Hàm lấy chi tiết sản phẩm khi click vào một đơn hàng
-  const handleViewDetails = async (orderId) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/orders/${orderId}/details`);
-      setSelectedOrderDetails(res.data);
-      setActiveOrderId(orderId);
-    } catch (err) {
-      console.error("Lỗi lấy chi tiết đơn hàng:", err);
-      alert("Không thể tải chi tiết đơn hàng này.");
-    }
-  };
-
-  // 3. Hàm mua lại sản phẩm
-  const handleRepurchase = (item) => {
-    try {
-      const cart = getCart();
-      
-      // Kiểm tra xem sản phẩm đã có trong giỏ chưa
-      const existingItem = cart.find(
-        cartItem => cartItem.id === item.product_id && cartItem.size === item.size
-      );
-
-      if (existingItem) {
-        // Nếu đã có, tăng số lượng
-        existingItem.quantity += item.quantity;
-      } else {
-        // Nếu chưa có, thêm vào giỏ
-        cart.push({
-          id: item.product_id,
-          name: item.product_name,
-          price: item.price,
-          size: item.size,
-          quantity: item.quantity,
-          image_url: item.image_url
-        });
-      }
-
-      saveCart(cart);
-      
-      // Hiển thị thông báo thành công
-      setSuccessMessage(`Đã thêm "${item.product_name}" vào giỏ hàng!`);
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err) {
-      console.error("Lỗi khi mua lại sản phẩm:", err);
-      alert("Không thể thêm sản phẩm vào giỏ hàng.");
-    }
-  };
-
-  // 4. Hàm điều hướng đến checkout
-  const handleCheckout = () => {
-    navigate('/checkout');
-  };
+  }, [user?.id]);
 
   if (loading) {
-    return (
-      <div style={styles.container}>
-        <p style={{ textAlign: 'center', fontSize: '18px' }}>Đang tải...</p>
-      </div>
-    );
+    return <div style={styles.container}><p style={{ textAlign: 'center' }}>Đang tải lịch sử...</p></div>;
   }
 
   return (
     <div style={styles.container}>
       <h2 style={styles.header}>📜 LỊCH SỬ MUA HÀNG</h2>
       
-      {/* Thông báo thành công */}
-      {successMessage && (
-        <div style={styles.successAlert}>
-          ✅ {successMessage}
-        </div>
-      )}
-
-      {completedOrders.length === 0 ? (
-        <div style={styles.emptyState}>
-          <p style={{ fontSize: '18px', color: '#666' }}>
-            Bạn chưa có đơn hàng hoàn thành nào.
-          </p>
-          <button 
-            onClick={() => navigate('/')} 
-            style={styles.shopBtn}
-          >
-            🛍️ Tiếp tục mua sắm
-          </button>
-        </div>
-      ) : (
-        <div style={styles.flexLayout}>
-          {/* CỘT TRÁI: DANH SÁCH ĐƠN HÀNG */}
-          <div style={styles.listSection}>
-            {completedOrders.map(order => (
-              <div 
-                key={order.id} 
-                onClick={() => handleViewDetails(order.id)}
-                style={{
-                  ...styles.orderCard,
-                  borderLeft: activeOrderId === order.id ? '6px solid #27ae60' : '6px solid #ddd',
-                  backgroundColor: activeOrderId === order.id ? '#f1f6f4' : '#fff'
-                }}
-              >
+      <div style={styles.flexLayout}>
+        <div style={styles.listSection}>
+          {completedOrders.length === 0 ? (
+            <div style={styles.emptyState}>
+              <p style={{ fontSize: '18px', color: '#666', marginBottom: '20px' }}>
+                Bạn chưa có đơn hàng hoàn thành nào.
+              </p>
+              <button onClick={() => navigate('/')} style={styles.shopBtn}>
+                🛍️ Tiếp tục mua sắm
+              </button>
+            </div>
+          ) : (
+            completedOrders.map(order => (
+              <div key={order.id} style={styles.orderCard}>
+                {/* Header đơn hàng */}
                 <div style={styles.cardHeader}>
-                  <strong>Mã đơn: #{order.id}</strong>
-                  <span style={{color: '#27ae60', fontWeight: 'bold'}}>✅ Hoàn thành</span>
+                  <span style={styles.orderIdText}>Mã đơn: #{order.id}</span>
+                  <span style={styles.statusBadge}>✅ Hoàn thành</span>
                 </div>
-                <div style={styles.cardBody}>
-                  <p>📅 Ngày đặt: {new Date(order.order_date).toLocaleString('vi-VN')}</p>
-                  <p>💰 Tổng tiền: <b style={{color: '#e67e22'}}>{order.total_money?.toLocaleString()}đ</b></p>
-                  <p>📍 Địa chỉ: {order.shipping_address?.replace(/(\d)\s+([A-ZÀ-Ỹ])/u, '$1, $2')}</p>
-                </div>
-                <div style={styles.cardFooter}>Bấm để xem sản phẩm và mua lại ↓</div>
-              </div>
-            ))}
-          </div>
 
-          {/* CỘT PHẢI: CHI TIẾT SẢN PHẨM TRONG ĐƠN */}
-          {/* <div style={styles.detailSection}>
-            <h3 style={{marginTop: 0, borderBottom: '2px solid #eee', paddingBottom: '10px'}}>
-              Chi tiết sản phẩm
-            </h3>
-            {!selectedOrderDetails ? (
-              <p style={{color: '#999', fontStyle: 'italic'}}>Chọn một đơn hàng bên trái để xem chi tiết sản phẩm...</p>
-            ) : (
-              <div>
-                {selectedOrderDetails.map((item, index) => (
-                  <div key={index} style={styles.productItem}>
-                    <img 
-                      src={`http://localhost:5000${item.image_url}`} 
-                      alt={item.product_name} 
-                      style={styles.productImg} 
-                      onError={(e) => { e.target.src = 'https://via.placeholder.com/70'; }}
-                    />
-                    <div style={styles.productInfo}>
-                      <div style={{fontWeight: 'bold', marginBottom: '5px'}}>{item.product_name}</div>
-                      <div style={{fontSize: '14px', color: '#666', marginBottom: '8px'}}>
-                        Size: <strong>{item.size || 'N/A'}</strong> | Số lượng: <strong>{item.quantity}</strong>
-                      </div>
-                      <div style={{fontSize: '14px', color: '#e67e22', fontWeight: 'bold', marginBottom: '8px'}}>
-                        Giá: {item.price?.toLocaleString()}đ
-                      </div>
-                      <button 
-                        onClick={() => handleRepurchase(item)}
-                        style={styles.repurchaseBtn}
-                      >
-                        🛒 Mua lại
-                      </button>
-                    </div>
+                {/* Nội dung đơn hàng */}
+                <div style={styles.cardBody}>
+                  <div style={styles.infoRow}>
+                    <span style={styles.label}>📅 Ngày đặt:</span>
+                    <span style={styles.value}>
+                      {new Date(order.order_date).toLocaleString('vi-VN')}
+                    </span>
                   </div>
-                ))}
-                <div style={styles.actionFooter}>
-                  <button 
-                    onClick={handleCheckout}
-                    style={styles.checkoutBtn}
-                  >
-                    Thanh toán giỏ hàng
-                  </button>
+                  <div style={styles.infoRow}>
+                    <span style={styles.label}>💰 Tổng tiền:</span>
+                    <span style={styles.totalValue}>
+                      {Number(order.total_money).toLocaleString('vi-VN')}đ
+                    </span>
+                  </div>
+                  <div style={styles.infoRow}>
+                    <span style={styles.label}>📍 Địa chỉ:</span>
+                    <span style={styles.value}>
+                      {order.shipping_address?.replace(/(\d)\s+([A-ZÀ-Ỹ])/u, '$1, $2')}
+                    </span>
+                  </div>
+                  <div style={styles.infoRow}>
+                    <span style={styles.label}>📞 Liên hệ:</span>
+                    <span style={styles.value}>{order.phone}</span>
+                  </div>
                 </div>
               </div>
-            )}
-          </div> */}
+            ))
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-// CSS Styles
 const styles = {
   container: { 
-    maxWidth: '1200px', 
-    margin: '40px auto', 
-    padding: '0 20px', 
-    fontFamily: 'Arial, sans-serif',
-    minHeight: '70vh'
+    padding: '40px 20px', 
+    backgroundColor: '#f4f7f6', 
+    minHeight: '100vh',
+    fontFamily: '"Inter", sans-serif'
   },
   header: { 
     textAlign: 'center', 
-    marginBottom: '30px', 
-    color: '#2d3436',
-    fontSize: '28px'
+    marginBottom: '40px', 
+    color: '#1a202c',
+    fontSize: '32px',
+    fontWeight: '700'
   },
-  successAlert: {
-    backgroundColor: '#d4edda',
-    border: '1px solid #c3e6cb',
-    color: '#155724',
-    padding: '12px 20px',
-    borderRadius: '5px',
-    marginBottom: '20px',
-    textAlign: 'center',
-    fontWeight: 'bold'
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '60px 20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '10px',
-    border: '1px solid #eee'
-  },
-  shopBtn: {
-    marginTop: '20px',
-    padding: '12px 30px',
-    backgroundColor: '#e67e22',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: '0.3s'
-  },
-  flexLayout: { 
-    display: 'flex', 
-    gap: '30px', 
-    flexWrap: 'wrap' 
-  },
+  flexLayout: { display: 'flex', justifyContent: 'center', width: '100%' },
   listSection: { 
-    flex: 1.5, 
-    minWidth: '350px' 
-  },
-  detailSection: { 
-    flex: 1, 
-    minWidth: '300px', 
-    background: '#f9f9f9', 
-    padding: '25px', 
-    borderRadius: '15px', 
-    border: '1px solid #eee', 
-    height: 'fit-content', 
-    position: 'sticky', 
-    top: '100px' 
+    width: '100%', 
+    maxWidth: '850px', // Khớp kích thước với trang Tiến độ
+    display: 'flex', 
+    flexDirection: 'column', 
+    gap: '20px' 
   },
   orderCard: { 
-    padding: '20px', 
-    borderRadius: '10px', 
-    marginBottom: '15px', 
-    cursor: 'pointer', 
-    boxShadow: '0 4px 6px rgba(0,0,0,0.05)', 
-    transition: '0.3s' 
+    backgroundColor: '#fff', 
+    borderRadius: '15px', 
+    padding: '25px', 
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+    border: '1px solid #e2e8f0',
+    borderLeft: '6px solid #27ae60' // Màu xanh đặc trưng của Hoàn thành
   },
   cardHeader: { 
     display: 'flex', 
     justifyContent: 'space-between', 
-    marginBottom: '10px',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginBottom: '15px',
+    paddingBottom: '12px',
+    borderBottom: '1px solid #f1f5f9'
   },
-  cardBody: { 
-    fontSize: '14px', 
-    color: '#444', 
-    lineHeight: '1.6' 
-  },
-  cardFooter: { 
-    marginTop: '10px', 
-    fontSize: '12px', 
-    color: '#999', 
-    textAlign: 'right' 
-  },
-  productItem: { 
-    display: 'flex', 
-    gap: '15px', 
-    alignItems: 'flex-start', 
-    padding: '15px 0', 
-    borderBottom: '1px solid #eee' 
-  },
-  productImg: { 
-    width: '70px', 
-    height: '70px', 
-    objectFit: 'cover', 
-    borderRadius: '8px' 
-  },
-  productInfo: { 
-    flex: 1 
-  },
-  repurchaseBtn: {
-    padding: '8px 12px',
-    backgroundColor: '#3498db',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
+  orderIdText: { fontSize: '18px', fontWeight: 'bold', color: '#2d3748' },
+  statusBadge: {
+    padding: '5px 12px',
+    backgroundColor: '#eafaf1',
+    color: '#27ae60',
+    borderRadius: '20px',
     fontSize: '13px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: '0.3s'
+    fontWeight: 'bold'
   },
-  actionFooter: {
-    marginTop: '20px',
+  cardBody: { display: 'flex', flexDirection: 'column', gap: '10px' },
+  infoRow: { display: 'flex', justifyContent: 'space-between', fontSize: '15px' },
+  label: { color: '#718096' },
+  value: { color: '#2d3748', fontWeight: '500', textAlign: 'right' },
+  totalValue: { color: '#e67e22', fontWeight: 'bold', fontSize: '17px' },
+  emptyState: {
     textAlign: 'center',
-    paddingTop: '20px',
-    borderTop: '2px solid #eee'
+    padding: '60px',
+    backgroundColor: '#fff',
+    borderRadius: '15px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.05)'
   },
-  checkoutBtn: {
-    padding: '12px 30px',
-    backgroundColor: '#27ae60',
+  shopBtn: {
+    padding: '12px 25px',
+    backgroundColor: '#2d3748',
     color: 'white',
     border: 'none',
-    borderRadius: '5px',
-    fontSize: '16px',
-    fontWeight: 'bold',
+    borderRadius: '8px',
     cursor: 'pointer',
-    transition: '0.3s'
+    fontWeight: 'bold'
   }
 };
 
