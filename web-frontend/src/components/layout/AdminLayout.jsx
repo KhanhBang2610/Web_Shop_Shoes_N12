@@ -10,6 +10,7 @@ const AdminLayout = ({ children }) => {
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '30px' }}>
           <Link to="/admin/dashboard" style={{ color: 'white', textDecoration: 'none' }}>📊 Dashboard</Link>
           <Link to="/admin/products" style={{ color: 'white', textDecoration: 'none' }}>👟 Quản lý sản phẩm</Link>
+          <Link to="/admin/discounts" style={{ color: 'white', textDecoration: 'none' }}>💰 Quản lý giảm giá</Link>
           <Link to="/admin/orders" style={{ color: 'white', textDecoration: 'none' }}>📜 Quản lý đơn hàng</Link>         
           <Link to="/admin/categories" style={{ color: 'white', textDecoration: 'none' }}>📁 Quản lý danh mục</Link>
           

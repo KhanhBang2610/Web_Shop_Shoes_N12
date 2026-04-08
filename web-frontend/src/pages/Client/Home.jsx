@@ -31,7 +31,7 @@ const Home = () => {
       {/* Banner */}
       <div style={styles.banner}>
         <h1 style={{ fontSize: '3.5rem', margin: 0, fontWeight: '800', letterSpacing: '-2px' }}>THỜI TRANG PHONG CÁCH</h1>
-        <p style={{ fontSize: '1.2rem', color: '#555' }}>Khám phá bộ sưu tập giày Hot nhất 2026</p>
+        <p style={{ fontSize: '1.5rem', color: '#555' }}>Khám phá bộ sưu tập giày Hot nhất 2026</p>
       </div>
 
       <h2 style={{ margin: '40px 0 20px', borderLeft: '6px solid #333', paddingLeft: '15px', fontSize: '24px' }}>

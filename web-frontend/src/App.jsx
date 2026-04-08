@@ -11,10 +11,12 @@ import Dashboard from './pages/Admin/Dashboard';
 import ProductManagement from './pages/Admin/ProductManagement';
 import OrderManagement from './pages/Admin/OrderManagement';
 import CategoryManagement from './pages/Admin/CategoryManagement';
+import DiscountManagement from './pages/Admin/DiscountManagement';
 
 // Pages Client
 import Auth from './pages/Client/Auth';
 import Home from './pages/Client/Home';
+import Brands from './pages/Client/Brands';
 import ProductDetail from './pages/Client/ProductDetail';
 import Cart from './pages/Client/Cart';
 import Checkout from './pages/Client/Checkout';
@@ -29,11 +31,15 @@ function App() {
     <GoogleOAuthProvider clientId="677343040491-ef2q2ntd7h9sgntmnebqoj32aqv04fr2.apps.googleusercontent.com">
       <Router>
         <Routes>
+          {/* AUTH riêng (không layout) */}
+          <Route path="/login" element={<Auth />} />
+          <Route path="/register" element={<Auth />} />
+          <Route path="/forgot-password" element={<Auth />} />
 
           {/* ================= CLIENT ================= */}
           <Route path="/" element={<CustomerLayout />}>
-
             <Route index element={<Home />} />
+            <Route path="brands" element={<Brands />} />
             <Route path="product/:id" element={<ProductDetail />} />
             <Route path="cart" element={<Cart />} />
             <Route path="checkout" element={<Checkout />} />
@@ -42,25 +48,19 @@ function App() {
             <Route path="purchase-history" element={<PurchaseHistory />} />
             <Route path="profile" element={<Profile />} />
             <Route path="promotions" element={<Promotions />} />
-
           </Route>
-
-          {/* AUTH riêng (không layout) */}
-          <Route path="/login" element={<Auth />} />
-          <Route path="/register" element={<Auth />} />
-          <Route path="/forgot-password" element={<Auth />} />
 
           {/* ================= ADMIN ================= */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="products" element={<ProductManagement />} />
+            <Route path="discounts" element={<DiscountManagement />} />
             <Route path="orders" element={<OrderManagement />} />
             <Route path="categories" element={<CategoryManagement />} />
           </Route>
 
           {/* Admin login riêng */}
           <Route path="/admin/login" element={<Auth />} />
-
         </Routes>
       </Router>
     </GoogleOAuthProvider>

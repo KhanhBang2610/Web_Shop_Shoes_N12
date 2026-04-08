@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // 1. Thêm useNavigate
+import { getCart, saveCart } from '../../utils/cartUtils';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -7,7 +8,7 @@ const Cart = () => {
 
   // Load giỏ hàng từ localStorage
   const loadCart = () => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cart = getCart();
     setCartItems(cart);
   };
 
@@ -25,18 +26,14 @@ const Cart = () => {
       return item;
     });
     saveCart(updatedCart);
+    setCartItems(updatedCart);
   };
 
   // Hàm xóa sản phẩm
   const removeItem = (id, size) => {
     const updatedCart = cartItems.filter(item => !(item.id === id && item.size === size));
     saveCart(updatedCart);
-  };
-
-  const saveCart = (newCart) => {
-    localStorage.setItem('cart', JSON.stringify(newCart));
-    setCartItems(newCart);
-    window.dispatchEvent(new Event('storage')); 
+    setCartItems(updatedCart);
   };
 
   const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
