@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getAuthConfig } from '../../api/authApi';
 
 const Dashboard = () => {
   // Bổ sung thêm các state để hứng dữ liệu mới từ Server
@@ -14,7 +15,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     // SỬA LỖI TẠI ĐÂY: Đổi từ /stats thành /status cho khớp với server.js
-    axios.get('http://localhost:5000/api/admin/status') 
+    axios.get('http://localhost:5000/api/admin/status', getAuthConfig()) 
       .then(res => setStats(res.data.data))
       .catch(err => console.log("Lỗi lấy thống kê:", err));
   }, []);

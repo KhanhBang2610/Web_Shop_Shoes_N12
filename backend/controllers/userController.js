@@ -5,10 +5,22 @@ exports.getProfile = async (req, res) => {
     try {
         // req.user được lấy từ middleware auth.js
         const [rows] = await db.execute('SELECT id, fullname, email, phone, address, city, role, avatar FROM users WHERE id = ?', [req.user.id]);
-        if (rows.length === 0) return res.status(404).json({ message: "Không tìm thấy user" });
-        res.json({ user: rows[0] });
+        if (rows.length === 0) return res.status(404).json({
+            success: false,
+            code: "USER_NOT_FOUND",
+            message: "Không tìm thấy user"
+        });
+        res.json({
+            success: true,
+            data: rows[0]
+        });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            success: false,
+            code: "GET_PROFILE_ERROR",
+            message: "Lỗi hệ thống khi lấy profile",
+            details: error.message
+        });
     }
 };
 
@@ -41,10 +53,20 @@ exports.updateProfile = async (req, res) => {
             });
         }
 
-        res.json({ message: "Cập nhật thành công", avatar: avatarUrl });
+        res.json({
+            success: true,
+            code: "PROFILE_UPDATED",
+            message: "Cập nhật thành công",
+            data: { avatar: avatarUrl }
+        });
     } catch (error) {
         await connection.rollback(); // HỦY BỎ NẾU CÓ LỖI (TRANSACTION)
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            success: false,
+            code: "UPDATE_PROFILE_ERROR",
+            message: "Lỗi hệ thống khi cập nhật profile",
+            details: error.message
+        });
     } finally {
         connection.release(); // Trả connection lại cho pool
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { getAuthConfig } from '../../api/authApi';
 
 const PurchaseHistory = () => {
   const [completedOrders, setCompletedOrders] = useState([]);
@@ -12,7 +13,7 @@ const PurchaseHistory = () => {
   // 1. Lấy danh sách đơn hàng đã hoàn thành (delivered)
   useEffect(() => {
     if (user?.id) {
-      axios.get(`http://localhost:5000/api/orders/user/${user.id}`)
+      axios.get(`http://localhost:5000/api/orders/user/${user.id}`, getAuthConfig())
         .then(res => {
           // Lọc chỉ lấy những đơn đã giao thành công
           const completed = res.data.data.filter(order => order.status === 'delivered');

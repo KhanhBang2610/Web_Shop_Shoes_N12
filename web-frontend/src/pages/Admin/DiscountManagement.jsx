@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getAuthConfig } from '../../api/authApi';
 
 const DiscountManagement = () => {
   const [products, setProducts] = useState([]);
@@ -7,33 +8,33 @@ const DiscountManagement = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [discountValue, setDiscountValue] = useState(0);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
   const fetchProducts = () => {
     axios.get('http://localhost:5000/api/products')
       .then(res => {
         setProducts(res.data.data);
         setLoading(false);
       })
-      .catch(err => {
-        console.error("Lỗi lấy danh sách sản phẩm:", err);
+      .catch(error => {
+        console.error("Lỗi lấy sản phẩm:", error);
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const handleSetDiscount = async (productId) => {
     try {
       await axios.put(`http://localhost:5000/api/products/${productId}/discount`, {
         discount: discountValue
-      });
+      }, getAuthConfig());
       alert("Cập nhật giảm giá thành công!");
       fetchProducts(); // Refresh danh sách
       setSelectedProduct(null);
       setDiscountValue(0);
-    } catch (err) {
-      console.error("Lỗi cập nhật giảm giá:", err);
+    } catch (error) {
+      console.error("Lỗi cập nhật giảm giá:", error);
       alert("Lỗi cập nhật giảm giá!");
     }
   };
@@ -42,11 +43,11 @@ const DiscountManagement = () => {
     try {
       await axios.put(`http://localhost:5000/api/products/${productId}/discount`, {
         discount: 0
-      });
+      }, getAuthConfig());
       alert("Đã xóa giảm giá!");
       fetchProducts();
-    } catch (err) {
-      console.error("Lỗi xóa giảm giá:", err);
+    } catch (error) {
+      console.error("Lỗi xóa giảm giá:", error);
       alert("Lỗi xóa giảm giá!");
     }
   };

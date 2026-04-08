@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getAuthConfig } from '../../api/authApi';
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -12,22 +13,22 @@ const ProductManagement = () => {
   });
   const [isEdit, setIsEdit] = useState(false);
 
-  useEffect(() => { 
-    fetchProducts(); 
-    fetchCategories(); 
-  }, []);
-
   const fetchProducts = () => {
     axios.get('http://localhost:5000/api/products')
       .then(res => setProducts(res.data.data))
-      .catch(err => console.error("Lỗi lấy danh sách sản phẩm:", err));
+      .catch(error => console.error("Lỗi lấy danh sách sản phẩm:", error));
   };
 
   const fetchCategories = () => {
     axios.get('http://localhost:5000/api/categories')
       .then(res => setCategories(res.data.data))
-      .catch(err => console.error("Lỗi lấy danh mục:", err));
+      .catch(error => console.error("Lỗi lấy danh mục:", error));
   };
+
+  useEffect(() => { 
+    fetchProducts(); 
+    fetchCategories(); 
+  }, []);
 
   const handleOpenAdd = () => {
     setCurrentProduct({ id: null, name: '', price: '', description: '', category_id: '' });
@@ -54,20 +55,20 @@ const ProductManagement = () => {
 
     try {
       if (isEdit) {
-        await axios.put(`http://localhost:5000/api/products/${currentProduct.id}`, formData);
+        await axios.put(`http://localhost:5000/api/products/${currentProduct.id}`, formData, getAuthConfig());
       } else {
-        await axios.post('http://localhost:5000/api/products', formData);
+        await axios.post('http://localhost:5000/api/products', formData, getAuthConfig());
       }
       setShowModal(false);
       fetchProducts();
-    } catch (error) {
+    } catch {
       alert("Lỗi thao tác!");
     }
   };
 
   const deleteProduct = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa?")) {
-      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      await axios.delete(`http://localhost:5000/api/products/${id}`, getAuthConfig());
       fetchProducts();
     }
   };

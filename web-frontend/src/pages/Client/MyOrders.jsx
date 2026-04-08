@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getAuthConfig } from '../../api/authApi';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -9,7 +10,7 @@ const MyOrders = () => {
 
   useEffect(() => {
     if (user?.id) {
-      axios.get(`http://localhost:5000/api/orders/user/${user.id}`)
+      axios.get(`http://localhost:5000/api/orders/user/${user.id}`, getAuthConfig())
         .then(res => {
           setOrders(res.data.data);
           setLoading(false);

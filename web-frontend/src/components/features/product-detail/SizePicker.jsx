@@ -26,3 +26,5 @@ const SizePicker = ({ variants, selectedColor, selectedSize, onSelect }) => {
     </div>
   );
 };
+
+export default SizePicker;

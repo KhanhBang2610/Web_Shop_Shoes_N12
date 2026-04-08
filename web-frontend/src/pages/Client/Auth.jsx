@@ -15,7 +15,7 @@ const Auth = () => {
     const [toastMessage, setToastMessage] = useState(null);
 
     useEffect(() => {
-        if (location.pathname.includes('/register')) setView('register');
+        if (location.pathname.includes('/register')) setView('register'); // eslint-disable-line react-hooks/set-state-in-effect
         else if (location.pathname.includes('/forgot-password')) setView('forgot');
         else setView('login');
         
@@ -86,22 +86,22 @@ const Auth = () => {
                     password: formData.password
                 });
                 
-                localStorage.setItem('user', JSON.stringify(res.data.user));
-                localStorage.setItem('token', res.data.token); 
+                localStorage.setItem('user', JSON.stringify(res.data.data.user));
+                localStorage.setItem('token', res.data.data.token); 
                 window.dispatchEvent(new Event('storage'));
 
                 // HIỂN THỊ TOAST VÀ ĐỢI 1.5 GIÂY RỒI MỚI CHUYỂN TRANG
                 setToastMessage("🎉 Đăng nhập thành công!");
                 setTimeout(() => {
-                    if (res.data.user.role === 'admin') navigate('/admin/dashboard');
+                    if (res.data.data.user.role === 'admin') navigate('/admin/dashboard');
                     else navigate('/'); 
                 }, 1500);
 
             } else if (view === 'register') {
                 const res = await axios.post('http://localhost:5000/api/register', formData);
                 
-                localStorage.setItem('user', JSON.stringify(res.data.user));
-                localStorage.setItem('token', res.data.token);
+                localStorage.setItem('user', JSON.stringify(res.data.data.user));
+                localStorage.setItem('token', res.data.data.token);
                 window.dispatchEvent(new Event('storage'));
 
                 // HIỂN THỊ TOAST VÀ ĐỢI 1.5 GIÂY RỒI MỚI CHUYỂN TRANG
@@ -127,8 +127,8 @@ const Auth = () => {
         // 2. Nếu Backend báo thành công
         if (res.data.success) {
             // Lưu Token và Thông tin user vào Local Storage
-            localStorage.setItem('token', res.data.token);
-            localStorage.setItem('user', JSON.stringify(res.data.user));
+            localStorage.setItem('token', res.data.data.token);
+            localStorage.setItem('user', JSON.stringify(res.data.data.user));
 
             alert(res.data.message || "Đăng nhập Google thành công!");
             

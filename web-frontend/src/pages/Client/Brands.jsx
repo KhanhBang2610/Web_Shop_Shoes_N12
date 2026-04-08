@@ -9,23 +9,6 @@ const Brands = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Lấy danh sách danh mục khi component mount
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = () => {
-    axios.get('http://localhost:5000/api/categories')
-      .then(res => {
-        setCategories(res.data.data);
-        // Chọn danh mục đầu tiên mặc định
-        if (res.data.data.length > 0) {
-          handleSelectCategory(res.data.data[0]);
-        }
-      })
-      .catch(err => console.error("Lỗi lấy danh mục:", err));
-  };
-
   const handleSelectCategory = (category) => {
     setSelectedCategory(category);
     fetchProductsByCategory(category.id);
@@ -44,6 +27,23 @@ const Brands = () => {
         setLoading(false);
       });
   };
+
+  const fetchCategories = () => {
+    axios.get('http://localhost:5000/api/categories')
+      .then(res => {
+        setCategories(res.data.data);
+        // Chọn danh mục đầu tiên mặc định
+        if (res.data.data.length > 0) {
+          handleSelectCategory(res.data.data[0]);
+        }
+      })
+      .catch(err => console.error("Lỗi lấy danh mục:", err));
+  };
+
+  // Lấy danh sách danh mục khi component mount
+  useEffect(() => {
+    fetchCategories();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAddToCart = (product) => {
     navigate(`/product/${product.id}`);

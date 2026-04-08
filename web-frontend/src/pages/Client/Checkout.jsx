@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getCart, clearCart } from '../../utils/cartUtils';
+import { getAuthConfig } from '../../api/authApi';
 
 const Checkout = () => {
   const location = useLocation();
@@ -69,7 +70,7 @@ const Checkout = () => {
     };
 
     try {
-      const res = await axios.post('http://localhost:5000/api/orders/checkout', orderData);
+      const res = await axios.post('http://localhost:5000/api/orders/checkout', orderData, getAuthConfig());
 
       if (res.data.success) {
         if (!isBuyNow) {
