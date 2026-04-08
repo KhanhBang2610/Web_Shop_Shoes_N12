@@ -41,8 +41,6 @@ const Auth = () => {
         if (name === 'password' && currentView !== 'forgot') {
             if (!value) errorMsg = "Mật khẩu không được để trống.";
             else if (/\s/.test(value)) errorMsg = "Mật khẩu không được chứa khoảng trắng.";
-            else if (value.length < 8) errorMsg = "Mật khẩu phải từ 8 ký tự trở lên.";
-            else if (value.length > 32) errorMsg = "Mật khẩu không được vượt quá 32 ký tự.";
         }
         return errorMsg;
     };

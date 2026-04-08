@@ -66,7 +66,7 @@ const OrderManagement = () => {
                 <td style={{ padding: '15px', textAlign: 'center' }}>
                   <span style={{ 
                     padding: '6px 12px', borderRadius: '20px', fontSize: '11px', color: 'white', fontWeight: 'bold', display: 'inline-block', minWidth: '90px',
-                    background: order.status === 'pending' ? '#f1c40f' : (order.status === 'delivered' ? '#2ecc71' : '#3498db') 
+                    background: order.status === 'pending' ? '#f1c40f' : (order.status === 'delivered' ? '#2ecc71' : '#d4335e') 
                   }}>
                     {order.status.toUpperCase()}
                   </span>

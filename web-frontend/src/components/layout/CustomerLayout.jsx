@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, Search, User, LogOut, Package, History, ChevronDown } from 'lucide-react';
+import { getCart } from '../../utils/cartUtils';
+import { NavLink } from 'react-router-dom';
 
 const CustomerLayout = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -23,7 +25,7 @@ const CustomerLayout = () => {
     checkUser();
 
     const updateCartCount = () => {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cart = getCart();
       const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
       setCartCount(totalItems);
     };
@@ -59,6 +61,7 @@ const CustomerLayout = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    window.dispatchEvent(new Event('storage'));
     setUser(null);
     setIsDropdownOpen(false); 
     navigate('/');
@@ -70,16 +73,11 @@ const CustomerLayout = () => {
         <div style={styles.container}>
             
           {/* LOGO & MAIN LINKS (Gộp từ file của Vũ) */}
+
           <div style={styles.leftSection}>
             <Link to="/" style={styles.logo}>👟 SHOES STORE</Link>
-            <ul style={styles.navLinks}>
-              <li><Link to="/shop" style={styles.link}>Cửa hàng</Link></li>
-              <li><Link to="/brands" style={styles.link}>Thương hiệu</Link></li>
-              <li><Link to="/sale" style={styles.link}>Giảm giá</Link></li>
-            </ul>
-          </div>
-          
-          <div style={styles.rightSection}>
+             <div style={styles.rightSection}>
+
             {/* THANH TÌM KIẾM */}
             <form onSubmit={handleSearch} style={styles.searchBar}>
               <input 
@@ -93,18 +91,47 @@ const CustomerLayout = () => {
                   <Search size={18} color="#666" />
               </button>
             </form>
-
+            <ul style={styles.navLinks}>
+              <li>
+                <NavLink 
+                  to="/brands" 
+                  style={({ isActive }) => ({
+                    textDecoration: 'none',
+                    color: isActive ? '#e67e22' : '#333',
+                    fontWeight: 'normal'
+                  })}
+                >
+                  <span>🌟</span>
+                  <span>Thương hiệu</span>
+                </NavLink>
+              </li>
+            </ul>
+          </div>
+          
             {/* Nút Khuyến mãi */}
-            <Link to="/promotions" style={styles.navLink}>
-              <span style={{ fontSize: '22px' }}>🏷️</span>
+            <NavLink 
+              to="/promotions" 
+              style={({ isActive }) => ({
+                textDecoration: 'none',
+                color: isActive ? '#e67e22' : '#333'
+              })}
+            >
+              <span>🏷️</span>
               <span>Khuyến mãi</span>
-            </Link>
+            </NavLink>
 
             {/* Nút Lịch sử */}
-            <Link to="/purchase-history" style={styles.navLink}>
-              <span style={{ fontSize: '22px' }}>📜</span>
+      
+            <NavLink 
+              to="/purchase-history" 
+              style={({ isActive }) => ({
+                textDecoration: 'none',
+                color: isActive ? '#e67e22' : '#333'
+              })}
+            >
+              <span>📜</span>
               <span>Lịch sử</span>
-            </Link>
+            </NavLink>
 
             {/* GIỎ HÀNG */}
             <Link to="/cart" style={styles.cartWrapper}>

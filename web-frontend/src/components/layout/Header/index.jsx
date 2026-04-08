@@ -23,9 +23,9 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    window.dispatchEvent(new Event('storage'));
     setUser(null);
-    navigate('/login'); 
-    window.location.reload(); // Reset lại toàn bộ state
+    navigate('/login');
   };
 
   return (

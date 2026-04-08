@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { getCart, saveCart } from '../../utils/cartUtils';
 
 const PurchaseHistory = () => {
   const [completedOrders, setCompletedOrders] = useState([]);
@@ -44,7 +45,7 @@ const PurchaseHistory = () => {
   // 3. Hàm mua lại sản phẩm
   const handleRepurchase = (item) => {
     try {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cart = getCart();
       
       // Kiểm tra xem sản phẩm đã có trong giỏ chưa
       const existingItem = cart.find(
@@ -66,8 +67,7 @@ const PurchaseHistory = () => {
         });
       }
 
-      localStorage.setItem('cart', JSON.stringify(cart));
-      window.dispatchEvent(new Event('storage'));
+      saveCart(cart);
       
       // Hiển thị thông báo thành công
       setSuccessMessage(`Đã thêm "${item.product_name}" vào giỏ hàng!`);

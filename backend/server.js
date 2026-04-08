@@ -94,8 +94,19 @@ app.use('/api/user', require('./routes/user')); // Gọi userController (Profile
 
 // --- [PRODUCT] QUẢN LÝ SẢN PHẨM ---
 app.get('/api/products', (req, res) => {
-    const sql = "SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.id DESC";
-    db.query(sql, (err, results) => {
+    let sql = "SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id";
+    let params = [];
+    
+    // Filter theo category_id nếu có query string
+    const categoryId = req.query.category_id;
+    if (categoryId) {
+        sql += " WHERE p.category_id = ?";
+        params.push(categoryId);
+    }
+    
+    sql += " ORDER BY p.id DESC";
+    
+    db.query(sql, params, (err, results) => {
         if (err) return res.status(500).json(err);
         const products = results.map(product => ({
             ...product,
@@ -208,6 +219,21 @@ app.delete('/api/categories/:id', (req, res) => {
     db.query("DELETE FROM categories WHERE id = ?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
         res.json({ message: "Xóa danh mục thành công" });
+    });
+});
+
+// --- [DISCOUNT] QUẢN LÝ GIẢM GIÁ SẢN PHẨM ---
+app.put('/api/products/:id/discount', (req, res) => {
+    const { discount } = req.body;
+    const discountValue = Number(discount) || 0;
+    
+    if (discountValue < 0 || discountValue > 100) {
+        return res.status(400).json({ message: "Phần trăm giảm giá phải từ 0 đến 100" });
+    }
+    
+    db.query("UPDATE products SET discount = ? WHERE id = ?", [discountValue, req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Cập nhật giảm giá thành công" });
     });
 });
 

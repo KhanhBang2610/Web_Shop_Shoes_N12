@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getCart, clearCart } from '../../utils/cartUtils';
 
 const Checkout = () => {
   const location = useLocation();
@@ -13,7 +14,7 @@ const Checkout = () => {
     if (location.state?.buyNowItem) {
       return [location.state.buyNowItem];
     }
-    return JSON.parse(localStorage.getItem('cart')) || [];
+    return getCart();
   });
 
   // Tối ưu biến user: Cho vào state để chỉ parse 1 lần duy nhất khi load trang
@@ -71,8 +72,7 @@ const Checkout = () => {
 
       if (res.data.success) {
         if (!isBuyNow) {
-          localStorage.removeItem('cart');
-          window.dispatchEvent(new Event('storage'));
+          clearCart();
         }
         alert("Đặt hàng thành công!");
         navigate('/success', { state: { orderId: res.data.orderId } });
