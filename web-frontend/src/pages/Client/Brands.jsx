@@ -17,10 +17,10 @@ const Brands = () => {
   const fetchCategories = () => {
     axios.get('http://localhost:5000/api/categories')
       .then(res => {
-        setCategories(res.data);
+        setCategories(res.data.data);
         // Chọn danh mục đầu tiên mặc định
-        if (res.data.length > 0) {
-          handleSelectCategory(res.data[0]);
+        if (res.data.data.length > 0) {
+          handleSelectCategory(res.data.data[0]);
         }
       })
       .catch(err => console.error("Lỗi lấy danh mục:", err));
@@ -35,7 +35,7 @@ const Brands = () => {
     setLoading(true);
     axios.get(`http://localhost:5000/api/products?category_id=${categoryId}`)
       .then(res => {
-        setProducts(res.data);
+        setProducts(res.data.data);
         setLoading(false);
       })
       .catch(err => {

@@ -15,7 +15,7 @@ const PurchaseHistory = () => {
       axios.get(`http://localhost:5000/api/orders/user/${user.id}`)
         .then(res => {
           // Lọc chỉ lấy những đơn đã giao thành công
-          const completed = res.data.filter(order => order.status === 'delivered');
+          const completed = res.data.data.filter(order => order.status === 'delivered');
           setCompletedOrders(completed);
           setLoading(false);
         })

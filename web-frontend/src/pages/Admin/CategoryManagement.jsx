@@ -14,7 +14,7 @@ const CategoryManagement = () => {
   const fetchCategories = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/categories');
-      setCategories(res.data);
+      setCategories(res.data.data);
     } catch (err) {
       console.error("Lỗi lấy danh mục:", err);
     }

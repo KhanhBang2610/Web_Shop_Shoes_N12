@@ -15,7 +15,7 @@ const Dashboard = () => {
   useEffect(() => {
     // SỬA LỖI TẠI ĐÂY: Đổi từ /stats thành /status cho khớp với server.js
     axios.get('http://localhost:5000/api/admin/status') 
-      .then(res => setStats(res.data))
+      .then(res => setStats(res.data.data))
       .catch(err => console.log("Lỗi lấy thống kê:", err));
   }, []);
 

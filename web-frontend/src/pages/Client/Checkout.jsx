@@ -76,7 +76,7 @@ const Checkout = () => {
           clearCart();
         }
         alert("Đặt hàng thành công!");
-        navigate('/success', { state: { orderId: res.data.orderId } });
+        navigate('/success', { state: { orderId: res.data.data.orderId } });
       } else {
         alert(res.data.message || "Đặt hàng không thành công!");
       }

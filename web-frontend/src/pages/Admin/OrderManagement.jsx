@@ -12,7 +12,7 @@ const OrderManagement = () => {
 
   const fetchOrders = () => {
     axios.get('http://localhost:5000/api/orders')
-      .then(res => setOrders(res.data))
+      .then(res => setOrders(res.data.data))
       .catch(err => console.error("Lỗi lấy danh sách đơn hàng:", err));
   };
 
@@ -28,7 +28,7 @@ const OrderManagement = () => {
   const viewOrderDetails = async (orderId) => {
     try {
       const res = await axios.get(`http://localhost:5000/api/orders/${orderId}/details`);
-      setSelectedOrderDetails(res.data);
+      setSelectedOrderDetails(res.data.data);
       setShowDetailsModal(true);
     } catch (error) {
       alert("Không thể lấy chi tiết đơn hàng này!");

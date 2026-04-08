@@ -9,7 +9,7 @@ const Promotions = () => {
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/promotions')
-      .then(res => setProducts(res.data))
+      .then(res => setProducts(res.data.data))
       .catch(err => console.error("Lỗi lấy sản phẩm khuyến mãi:", err));
   }, []);
 

@@ -14,7 +14,7 @@ const DiscountManagement = () => {
   const fetchProducts = () => {
     axios.get('http://localhost:5000/api/products')
       .then(res => {
-        setProducts(res.data);
+        setProducts(res.data.data);
         setLoading(false);
       })
       .catch(err => {

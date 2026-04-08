@@ -11,7 +11,7 @@ const MyOrders = () => {
     if (user?.id) {
       axios.get(`http://localhost:5000/api/orders/user/${user.id}`)
         .then(res => {
-          setOrders(res.data);
+          setOrders(res.data.data);
           setLoading(false);
         })
         .catch(err => {
