@@ -61,7 +61,7 @@ const OrderManagement = () => {
                   {Number(order.total_money).toLocaleString()}đ
                 </td>
                 <td style={{ padding: '15px', fontSize: '13px', color: '#636e72', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {order.shipping_address}
+                  {order.shipping_address?.replace(/(\d)\s+([A-ZÀ-Ỹ])/u, '$1, $2')}
                 </td>
                 <td style={{ padding: '15px', textAlign: 'center' }}>
                   <span style={{ 

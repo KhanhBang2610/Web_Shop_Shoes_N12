@@ -25,7 +25,7 @@ const Checkout = () => {
       return null;
     }
   });
-
+  
   const [formData, setFormData] = useState({
     fullname: user?.fullname || '',
     phone: user?.phone || '',
@@ -52,12 +52,12 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return alert("Vui lòng đăng nhập!");
-
     const orderData = {
       user_id: user.id,
       total_money: totalPrice,
       shipping_address: formData.address,
       phone: String(formData.phone),
+      city: String(formData.city),
       details: displayItems.map(item => ({
         product_id: parseInt(item.id),
         size: String(item.size),
@@ -112,7 +112,6 @@ const Checkout = () => {
             />
           </div>
 
-          {/* TRƯỜNG MỚI THÊM: Thành phố */}
           <div style={styles.inputGroup}>
             <label>Thành phố:</label>
             <input

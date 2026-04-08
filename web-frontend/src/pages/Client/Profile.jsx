@@ -112,7 +112,14 @@ const Profile = () => {
             const res = await updateProfile(formData); 
             
             const currentUser = JSON.parse(localStorage.getItem('user'));
-            const updatedUser = { ...currentUser, fullname: profile.fullname, avatar: res.avatar || profile.avatar };
+            const updatedUser = { 
+                ...currentUser,
+                fullname: profile.fullname,
+                phone: profile.phone,
+                address: profile.address,
+                city: profile.city,
+                avatar: res.avatar || profile.avatar
+                };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             window.dispatchEvent(new Event('storage'));
 

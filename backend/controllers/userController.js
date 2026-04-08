@@ -4,7 +4,7 @@ const db = require('../config/db');
 exports.getProfile = async (req, res) => {
     try {
         // req.user được lấy từ middleware auth.js
-        const [rows] = await db.execute('SELECT id, fullname, email, phone, address, role, avatar FROM users WHERE id = ?', [req.user.id]);
+        const [rows] = await db.execute('SELECT id, fullname, email, phone, address, city, role, avatar FROM users WHERE id = ?', [req.user.id]);
         if (rows.length === 0) return res.status(404).json({ message: "Không tìm thấy user" });
         res.json({ user: rows[0] });
     } catch (error) {
@@ -17,7 +17,7 @@ exports.updateProfile = async (req, res) => {
     try {
         await connection.beginTransaction(); // BẮT ĐẦU TRANSACTION
 
-        const { fullname, phone, address } = req.body;
+        const { fullname, phone, address, city } = req.body;
         let avatarUrl = req.body.existing_avatar || null; // Giữ avatar cũ nếu ko upload
 
         // Upload(++) - Xử lý file ảnh avatar
@@ -27,8 +27,8 @@ exports.updateProfile = async (req, res) => {
 
         // Thực thi Update
         await connection.execute(
-            'UPDATE users SET fullname = ?, phone = ?, address = ?, avatar = ? WHERE id = ?',
-            [fullname, phone || null, address || null, avatarUrl, req.user.id]
+            'UPDATE users SET fullname = ?, phone = ?, address = ?, city = ?, avatar = ? WHERE id = ?',
+            [fullname, phone || null, address || null, city || null, avatarUrl, req.user.id]
         );
 
         await connection.commit(); // HOÀN TẤT TRANSACTION

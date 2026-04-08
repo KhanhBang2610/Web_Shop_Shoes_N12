@@ -135,7 +135,7 @@ const PurchaseHistory = () => {
                 <div style={styles.cardBody}>
                   <p>📅 Ngày đặt: {new Date(order.order_date).toLocaleString('vi-VN')}</p>
                   <p>💰 Tổng tiền: <b style={{color: '#e67e22'}}>{order.total_money?.toLocaleString()}đ</b></p>
-                  <p>📍 Địa chỉ: {order.shipping_address}</p>
+                  <p>📍 Địa chỉ: {order.shipping_address?.replace(/(\d)\s+([A-ZÀ-Ỹ])/u, '$1, $2')}</p>
                 </div>
                 <div style={styles.cardFooter}>Bấm để xem sản phẩm và mua lại ↓</div>
               </div>
@@ -143,7 +143,7 @@ const PurchaseHistory = () => {
           </div>
 
           {/* CỘT PHẢI: CHI TIẾT SẢN PHẨM TRONG ĐƠN */}
-          <div style={styles.detailSection}>
+          {/* <div style={styles.detailSection}>
             <h3 style={{marginTop: 0, borderBottom: '2px solid #eee', paddingBottom: '10px'}}>
               Chi tiết sản phẩm
             </h3>
@@ -186,7 +186,7 @@ const PurchaseHistory = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       )}
     </div>
