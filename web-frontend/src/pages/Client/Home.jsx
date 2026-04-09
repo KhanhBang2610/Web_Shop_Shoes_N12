@@ -8,7 +8,7 @@ const Home = () => {
   const navigate = useNavigate();
   useEffect(() => {
     axios.get('http://localhost:5000/api/products')
-      .then(res => setProducts(res.data))
+      .then(res => setProducts(res.data.data))
       .catch(err => console.error("Lỗi lấy sản phẩm:", err));
   }, []);
 

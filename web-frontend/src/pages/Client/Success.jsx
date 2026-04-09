@@ -1,10 +1,8 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Success = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const orderId = location.state?.orderId; // Lấy ID đơn hàng vừa tạo
 
   return (
     <div style={styles.container}>

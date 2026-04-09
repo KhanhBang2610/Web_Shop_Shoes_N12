@@ -25,7 +25,7 @@ const Profile = () => {
     const loadProfile = async () => {
         try {
             const response = await getProfile();
-            setProfile(response.user);
+            setProfile(response);
         } catch (error) {
             console.error('Lỗi tải profile:', error);
         } finally {
@@ -33,13 +33,13 @@ const Profile = () => {
         }
     };
 
-    const validateField = (name, value) => {
+   const validateField = (name, value) => {
         let errorMsg = '';
+        
         if (name === 'fullname') {
-            const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
             if (!value.trim()) errorMsg = "Họ tên không được để trống.";
-            else if (!nameRegex.test(value)) errorMsg = "Họ tên không hợp lệ (Không chứa số hay ký tự đặc biệt).";
         }
+        
         if (name === 'phone') {
             const cleanPhone = value.replace(/[\s-]/g, ''); 
             const phoneRegex = /^\+?[0-9]{7,15}$/;
@@ -47,6 +47,7 @@ const Profile = () => {
                 errorMsg = "Số điện thoại không hợp lệ (Phải từ 7 đến 15 số, có thể bắt đầu bằng +).";
             }
         }
+        
         return errorMsg;
     };
 
@@ -118,7 +119,7 @@ const Profile = () => {
                 phone: profile.phone,
                 address: profile.address,
                 city: profile.city,
-                avatar: res.avatar || profile.avatar
+                avatar: res.data.avatar || profile.avatar
                 };
             localStorage.setItem('user', JSON.stringify(updatedUser));
             window.dispatchEvent(new Event('storage'));
@@ -174,20 +175,37 @@ const Profile = () => {
                 <form onSubmit={handleSubmit} style={styles.form}>
                     {errors.submit && <div style={styles.serverError}>{errors.submit}</div>}
 
-                    <div style={{...styles.field, textAlign: 'center'}}>
+                   <div style={{...styles.field, textAlign: 'center'}}>
                         <div style={styles.avatarContainer}>
                             {avatarFile ? (
                                 <img src={URL.createObjectURL(avatarFile)} alt="Preview" style={styles.avatarImage} />
                             ) : profile.avatar ? (
-                                <img src={`http://localhost:5000${profile.avatar}`} alt="Avatar" style={styles.avatarImage} />
+                                // Kiểm tra nếu là link Google (bắt đầu bằng http) thì giữ nguyên, ngược lại thì thêm localhost
+                                <img 
+                                    src={profile.avatar.startsWith('http') ? profile.avatar : `http://localhost:5000${profile.avatar}`} 
+                                    alt="Avatar" 
+                                    style={styles.avatarImage} 
+                                    referrerPolicy="no-referrer"
+                                />
                             ) : (
                                 <div style={styles.avatarPlaceholder}>👤</div>
                             )}
                         </div>
-                        {isEditing && (
+                        
+                        {/* Chỉ hiện nút Chọn tệp khi đang edit VÀ ảnh không phải từ Google */}
+                        {isEditing && !(profile.avatar && profile.avatar.startsWith('http')) && (
                             <div style={{marginTop: '15px'}}>
                                 <input type="file" accept="image/*" onChange={handleFileChange} style={styles.fileInput} />
                                 {errors.avatar && <div style={styles.errorTextCenter}>{errors.avatar}</div>}
+                            </div>
+                        )}
+
+                        {/* HIỆN THÔNG BÁO: Báo cho user biết ảnh đang lấy từ Google */}
+                        {isEditing && profile.avatar && profile.avatar.startsWith('http') && (
+                            <div style={{marginTop: '15px'}}>
+                                {/* <small style={{ color: '#888', fontStyle: 'italic' }}>
+                                    Ảnh đại diện được đồng bộ từ tài khoản Google.
+                                </small> */}
                             </div>
                         )}
                     </div>

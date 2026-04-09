@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getCart, clearCart } from '../../utils/cartUtils';
+import { getAuthConfig } from '../../api/authApi';
 
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 1. FIX LỖI SET-STATE-IN-EFFECT: Khởi tạo state ngay từ đầu, không chờ useEffect nữa
   const [isBuyNow] = useState(() => !!location.state?.buyNowItem);
 
   const [displayItems] = useState(() => {
@@ -17,7 +17,6 @@ const Checkout = () => {
     return getCart();
   });
 
-  // Tối ưu biến user: Cho vào state để chỉ parse 1 lần duy nhất khi load trang
   const [user] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('user'));
@@ -31,10 +30,9 @@ const Checkout = () => {
     fullname: user?.fullname || '',
     phone: user?.phone || '',
     address: user?.address || '',
-    city: user?.city || ''
+    city: user?.city || '' // Vẫn giữ city ở state để User nhập liệu dễ dàng
   });
 
-  // 2. FIX LỖI EXHAUSTIVE-DEPS: useEffect giờ chỉ làm nhiệm vụ kiểm tra và đá văng (chuyển trang)
   useEffect(() => {
     if (!user) {
       alert("Vui lòng đăng nhập để thanh toán!");
@@ -46,19 +44,23 @@ const Checkout = () => {
       alert("Không có sản phẩm nào để thanh toán!");
       navigate('/');
     }
-  }, [user, navigate, displayItems.length]); // Đã bổ sung đầy đủ dependencies
+  }, [user, navigate, displayItems.length]);
 
   const totalPrice = displayItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return alert("Vui lòng đăng nhập!");
+
+    // --- LOGIC GOM ĐỊA CHỈ: Kết hợp Address và City ---
+    const combinedAddress = `${formData.address}, ${formData.city}`;
+
     const orderData = {
       user_id: user.id,
       total_money: totalPrice,
-      shipping_address: formData.address,
+      shipping_address: combinedAddress, // Gửi chuỗi đã gom cho Admin
       phone: String(formData.phone),
-      city: String(formData.city),
+      // Chúng ta không cần gửi trường city riêng biệt nữa nếu Admin đã xem trong shipping_address
       details: displayItems.map(item => ({
         product_id: parseInt(item.id),
         size: String(item.size),
@@ -68,14 +70,14 @@ const Checkout = () => {
     };
 
     try {
-      const res = await axios.post('http://localhost:5000/api/orders/checkout', orderData);
+      const res = await axios.post('http://localhost:5000/api/orders/checkout', orderData, getAuthConfig());
 
       if (res.data.success) {
         if (!isBuyNow) {
           clearCart();
         }
         alert("Đặt hàng thành công!");
-        navigate('/success', { state: { orderId: res.data.orderId } });
+        navigate('/success', { state: { orderId: res.data.data.orderId } });
       } else {
         alert(res.data.message || "Đặt hàng không thành công!");
       }
@@ -85,12 +87,12 @@ const Checkout = () => {
     }
   };
 
-  if (!user) return null; // Ẩn giao diện nếu chưa có user
+  if (!user) return null;
 
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>
-        {isBuyNow ? "Thông tin mua ngay" : "Thông tin thanh toán giỏ hàng"}
+        {isBuyNow ? "🛍️ THÔNG TIN MUA NGAY" : "🛒 THANH TOÁN GIỎ HÀNG"}
       </h2>
 
       <div style={styles.flexBox}>
@@ -112,20 +114,21 @@ const Checkout = () => {
             />
           </div>
 
+          {/* Trường Thành phố tách riêng để User dễ nhập */}
           <div style={styles.inputGroup}>
-            <label>Thành phố:</label>
+            <label>Tỉnh / Thành phố:</label>
             <input
               type="text"
               required
               value={formData.city}
-              placeholder="Nhập tỉnh / thành phố"
+              placeholder="Ví dụ: Tp.HCM, Hà Nội..."
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               style={styles.input}
             />
           </div>
 
           <div style={styles.inputGroup}>
-            <label>Địa chỉ nhận hàng:</label>
+            <label>Địa chỉ cụ thể:</label>
             <textarea
               required
               value={formData.address}
@@ -147,7 +150,8 @@ const Checkout = () => {
           {displayItems.map((item, idx) => (
             <div key={idx} style={styles.itemSummary}>
               <span>{item.name} <strong>(Size: {item.size})</strong> x {item.quantity}</span>
-              <span>{(item.price * item.quantity).toLocaleString()}đ</span>
+              {/* FIX TIỀN TỆ: toLocaleString('vi-VN') */}
+              <span>{Number(item.price * item.quantity).toLocaleString('vi-VN')}đ</span>
             </div>
           ))}
 
@@ -156,7 +160,8 @@ const Checkout = () => {
           <div style={styles.totalRow}>
             <strong>Tổng cộng:</strong>
             <strong style={{ color: '#e67e22', fontSize: '20px' }}>
-              {totalPrice.toLocaleString()}đ
+              {/* FIX TIỀN TỆ: toLocaleString('vi-VN') */}
+              {Number(totalPrice).toLocaleString('vi-VN')}đ
             </strong>
           </div>
         </div>
@@ -166,16 +171,16 @@ const Checkout = () => {
 };
 
 const styles = {
-  container: { maxWidth: '1000px', margin: '40px auto', padding: '0 20px', minHeight: '80vh' },
-  title: { textAlign: 'center', marginBottom: '30px', color: '#2d3436' },
+  container: { maxWidth: '1000px', margin: '40px auto', padding: '0 20px', minHeight: '80vh', fontFamily: 'Arial, sans-serif' },
+  title: { textAlign: 'center', marginBottom: '30px', color: '#2d3436', fontWeight: 'bold' },
   flexBox: { display: 'flex', gap: '40px', flexWrap: 'wrap' },
-  formSection: { flex: 1.5, minWidth: '300px', background: '#f9f9f9', padding: '25px', borderRadius: '15px' },
-  summarySection: { flex: 1, minWidth: '300px', border: '1px solid #eee', padding: '25px', borderRadius: '15px', alignSelf: 'flex-start' },
+  formSection: { flex: 1.5, minWidth: '300px', background: '#f9f9f9', padding: '25px', borderRadius: '15px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' },
+  summarySection: { flex: 1, minWidth: '300px', border: '1px solid #eee', padding: '25px', borderRadius: '15px', alignSelf: 'flex-start', background: '#fff' },
   inputGroup: { marginBottom: '15px' },
-  input: { width: '100%', padding: '12px', marginTop: '5px', borderRadius: '5px', border: '1px solid #ddd', boxSizing: 'border-box' },
-  inputDisabled: { width: '100%', padding: '12px', marginTop: '5px', borderRadius: '5px', border: '1px solid #ddd', background: '#eee', boxSizing: 'border-box' },
-  textarea: { width: '100%', padding: '12px', marginTop: '5px', borderRadius: '5px', border: '1px solid #ddd', minHeight: '100px', boxSizing: 'border-box' },
-  confirmBtn: { width: '100%', padding: '15px', background: '#2d3436', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', marginTop: '20px', fontSize: '16px' },
+  input: { width: '100%', padding: '12px', marginTop: '5px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box', outline: 'none' },
+  inputDisabled: { width: '100%', padding: '12px', marginTop: '5px', borderRadius: '8px', border: '1px solid #ddd', background: '#e9ecef', boxSizing: 'border-box', color: '#6c757d' },
+  textarea: { width: '100%', padding: '12px', marginTop: '5px', borderRadius: '8px', border: '1px solid #ddd', minHeight: '80px', boxSizing: 'border-box', outline: 'none', resize: 'vertical' },
+  confirmBtn: { width: '100%', padding: '15px', background: '#2d3436', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', marginTop: '20px', fontSize: '16px', transition: '0.3s' },
   itemSummary: { display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '14px', color: '#2d3436' },
   divider: { height: '1px', background: '#eee', margin: '15px 0' },
   totalRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' }

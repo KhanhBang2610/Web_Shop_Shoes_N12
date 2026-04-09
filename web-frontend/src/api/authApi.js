@@ -15,7 +15,7 @@ export const getProfile = async () => {
     const response = await axios.get(`${API_URL}/user/profile`, {
         headers: getAuthHeaders()
     });
-    return response.data;
+    return response.data.data;
 };
 
 // Truyền FormData để upload ảnh
@@ -27,4 +27,16 @@ export const updateProfile = async (formData) => {
         }
     });
     return response.data;
+};
+
+export const loginAdmin = async (credentials) => {
+    const response = await axios.post(`${API_URL}/login`, credentials);
+    return response.data.data;
+};
+
+export const getAuthConfig = () => {
+    const token = localStorage.getItem('token');
+    return {
+        headers: { Authorization: `Bearer ${token}` }
+    };
 };

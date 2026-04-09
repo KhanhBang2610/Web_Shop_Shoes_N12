@@ -28,7 +28,7 @@ import Promotions from './pages/Client/Promotions';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+    <GoogleOAuthProvider clientId="677343040491-ef2q2ntd7h9sgntmnebqoj32aqv04fr2.apps.googleusercontent.com">
       <Router>
         <Routes>
           {/* AUTH riêng (không layout) */}

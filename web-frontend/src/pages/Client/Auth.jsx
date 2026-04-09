@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Auth = () => {
     const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Auth = () => {
     const [toastMessage, setToastMessage] = useState(null);
 
     useEffect(() => {
-        if (location.pathname.includes('/register')) setView('register');
+        if (location.pathname.includes('/register')) setView('register'); // eslint-disable-line react-hooks/set-state-in-effect
         else if (location.pathname.includes('/forgot-password')) setView('forgot');
         else setView('login');
         
@@ -27,23 +28,28 @@ const Auth = () => {
     }, [location.pathname]);
 
     const validateField = (name, value, currentView) => {
-        let errorMsg = '';
-        if (name === 'fullname' && currentView === 'register') {
-            const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
-            if (!value.trim()) errorMsg = "Họ tên không được để trống.";
-            else if (!nameRegex.test(value)) errorMsg = "Họ tên chỉ được chứa chữ cái, không chứa số hay ký tự đặc biệt.";
-        }
-        if (name === 'email') {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!value.trim()) errorMsg = "Email không được để trống.";
-            else if (!emailRegex.test(value)) errorMsg = "Định dạng email không hợp lệ (VD: abc@gmail.com).";
-        }
-        if (name === 'password' && currentView !== 'forgot') {
-            if (!value) errorMsg = "Mật khẩu không được để trống.";
-            else if (/\s/.test(value)) errorMsg = "Mật khẩu không được chứa khoảng trắng.";
-        }
-        return errorMsg;
-    };
+    let errorMsg = '';
+    
+    if (name === 'fullname' && currentView === 'register') {
+        // K tra không được để trống (hoặc toàn khoảng trắng)
+        if (!value.trim()) errorMsg = "Họ tên không được để trống.";
+    }
+    
+    if (name === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value.trim()) errorMsg = "Email không được để trống.";
+        else if (!emailRegex.test(value)) errorMsg = "Định dạng email không hợp lệ (VD: abc@gmail.com).";
+    }
+    
+    if (name === 'password' && currentView !== 'forgot') {
+        if (!value) errorMsg = "Mật khẩu không được để trống.";
+        else if (/\s/.test(value)) errorMsg = "Mật khẩu không được chứa khoảng trắng.";
+        else if (value.length < 8) errorMsg = "Mật khẩu phải từ 8 ký tự trở lên.";
+        else if (value.length > 32) errorMsg = "Mật khẩu không được vượt quá 32 ký tự.";
+    }
+    
+    return errorMsg;
+};
 
     const handleBlur = (e) => {
         const { name, value } = e.target;
@@ -80,22 +86,22 @@ const Auth = () => {
                     password: formData.password
                 });
                 
-                localStorage.setItem('user', JSON.stringify(res.data.user));
-                localStorage.setItem('token', res.data.token); 
+                localStorage.setItem('user', JSON.stringify(res.data.data.user));
+                localStorage.setItem('token', res.data.data.token); 
                 window.dispatchEvent(new Event('storage'));
 
                 // HIỂN THỊ TOAST VÀ ĐỢI 1.5 GIÂY RỒI MỚI CHUYỂN TRANG
                 setToastMessage("🎉 Đăng nhập thành công!");
                 setTimeout(() => {
-                    if (res.data.user.role === 'admin') navigate('/admin/dashboard');
+                    if (res.data.data.user.role === 'admin') navigate('/admin/dashboard');
                     else navigate('/'); 
                 }, 1500);
 
             } else if (view === 'register') {
                 const res = await axios.post('http://localhost:5000/api/register', formData);
                 
-                localStorage.setItem('user', JSON.stringify(res.data.user));
-                localStorage.setItem('token', res.data.token);
+                localStorage.setItem('user', JSON.stringify(res.data.data.user));
+                localStorage.setItem('token', res.data.data.token);
                 window.dispatchEvent(new Event('storage'));
 
                 // HIỂN THỊ TOAST VÀ ĐỢI 1.5 GIÂY RỒI MỚI CHUYỂN TRANG
@@ -111,7 +117,30 @@ const Auth = () => {
             else setErrors({ ...errors, submit: serverMsg });
         }
     };
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+        // 1. Gửi token nhận được từ Google xuống Backend của bạn
+        const res = await axios.post('http://localhost:5000/api/auth/google', {
+            credential: credentialResponse.credential,
+        });
 
+        // 2. Nếu Backend báo thành công
+        if (res.data.success) {
+            // Lưu Token và Thông tin user vào Local Storage
+            localStorage.setItem('token', res.data.data.token);
+            localStorage.setItem('user', JSON.stringify(res.data.data.user));
+
+            alert(res.data.message || "Đăng nhập Google thành công!");
+            
+            // 3. Chuyển hướng về trang chủ
+            // Nếu bạn dùng window.location.href thì trang sẽ load lại để Header cập nhật ảnh đại diện luôn
+            window.location.href = '/'; 
+        }
+        } catch (error) {
+        console.error("Lỗi xác thực Google từ Server:", error);
+        alert(error.response?.data?.message || "Đăng nhập Google thất bại! Vui lòng thử lại.");
+        }
+    };
     return (
         <div style={styles.container}>
             {/* THÊM CSS ANIMATION CHO TOAST TRƯỢT TỪ TRÊN XUỐNG */}
@@ -196,6 +225,27 @@ const Auth = () => {
                                     <button type="submit" className="auth-btn" style={styles.button}>
                                         {view === 'login' ? 'ĐĂNG NHẬP' : 'ĐĂNG KÝ NGAY'}
                                     </button>
+                                    <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', margin: '15px 0' }}>
+                                            <div style={{ flex: 1, height: '1px', backgroundColor: '#e0e0e0' }}></div>
+                                            <span style={{ padding: '0 10px', color: '#888', fontSize: '14px' }}>Hoặc</span>
+                                            <div style={{ flex: 1, height: '1px', backgroundColor: '#e0e0e0' }}></div>
+                                        </div>
+
+                                        {/* Nút Google */}
+                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                            <GoogleLogin
+                                            onSuccess={handleGoogleSuccess}
+                                            onError={() => {
+                                                console.log('Đăng nhập Google thất bại');
+                                                alert('Có lỗi xảy ra khi kết nối với Google!');
+                                            }}
+                                            shape="rectangular" // Hình chữ nhật cho hợp với form
+                                            size="large" // Nút to
+                                            text="signin_with" // Hiển thị chữ "Sign in with Google"
+                                            />
+                                        </div>
+                                    </div>
                                 </form>
                                 <p style={styles.switchText}>
                                     {view === 'login' ? "Chưa có tài khoản?" : "Đã có tài khoản?"} 

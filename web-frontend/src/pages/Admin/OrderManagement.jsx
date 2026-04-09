@@ -1,36 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getAuthConfig } from '../../api/authApi';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState([]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
+  const fetchOrders = () => {
+    axios.get('http://localhost:5000/api/orders', getAuthConfig())
+      .then(res => setOrders(res.data.data))
+      .catch(error => console.error("Lỗi lấy danh sách đơn hàng:", error));
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  const fetchOrders = () => {
-    axios.get('http://localhost:5000/api/orders')
-      .then(res => setOrders(res.data))
-      .catch(err => console.error("Lỗi lấy danh sách đơn hàng:", err));
-  };
-
   const updateStatus = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/orders/${id}/status`, { status: newStatus });
+      await axios.put(`http://localhost:5000/api/orders/${id}/status`, { status: newStatus }, getAuthConfig());
       fetchOrders();
-    } catch (error) {
+    } catch {
       alert("Lỗi cập nhật trạng thái!");
     }
   };
 
   const viewOrderDetails = async (orderId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/orders/${orderId}/details`);
-      setSelectedOrderDetails(res.data);
+      const res = await axios.get(`http://localhost:5000/api/orders/${orderId}/details`, getAuthConfig());
+      setSelectedOrderDetails(res.data.data);
       setShowDetailsModal(true);
-    } catch (error) {
+    } catch {
       alert("Không thể lấy chi tiết đơn hàng này!");
     }
   };

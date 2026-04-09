@@ -142,24 +142,31 @@ const CustomerLayout = () => {
             {/* KHU VỰC USER (DROPDOWN) */}
             <div style={styles.authSection}>
               {user ? (
+                // ĐÃ SỬA: Xóa 1 thẻ bị lặp ở đây
                 <div style={styles.dropdownContainer} ref={dropdownRef}>
+                  
                   <div style={styles.userTrigger} onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                     {user.avatar ? (
-                        <img src={`http://localhost:5000${user.avatar}`} alt="Avatar" style={styles.headerAvatar} />
+                        <img 
+                            src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`} 
+                            alt="Avatar" 
+                            style={styles.headerAvatar} 
+                            referrerPolicy="no-referrer" 
+                        />
                     ) : (
                         <div style={styles.headerAvatarPlaceholder}><User size={16} color="#666" /></div>
                     )}
                     <span style={styles.userName}>{user.fullname}</span>
                     <ChevronDown size={14} color="#666" />
                   </div>
-
+                  
                   {/* MENU THẢ XUỐNG CÁC TÍNH NĂNG */}
                   {isDropdownOpen && (
                       <div style={styles.dropdownMenu}>
                           <Link to="/profile" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
                               <User size={16} /> Thông tin tài khoản
                           </Link>
-                          <Link to="/orders" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
+                          <Link to="/my-orders" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>
                               <Package size={16} /> Đơn hàng của tôi
                           </Link>
                           <Link to="/purchase-history" style={styles.dropdownItem} onClick={() => setIsDropdownOpen(false)}>

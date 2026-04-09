@@ -1,108 +1,95 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getAuthConfig } from '../../api/authApi';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null); // Lưu chi tiết SP của đơn đang chọn
-  const [activeOrderId, setActiveOrderId] = useState(null); // Lưu ID đơn đang được xem
+  const [loading, setLoading] = useState(true);
   
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // 1. Lấy danh sách đơn hàng của User
   useEffect(() => {
-    if (user && user.id) {
-      axios.get(`http://localhost:5000/api/orders/user/${user.id}`)
-        .then(res => setOrders(res.data))
-        .catch(err => console.error("Lỗi lấy danh sách đơn hàng:", err));
+    if (user?.id) {
+      axios.get(`http://localhost:5000/api/orders/user/${user.id}`, getAuthConfig())
+        .then(res => {
+          setOrders(res.data.data);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Lỗi lấy danh sách đơn hàng:", err);
+          setLoading(false);
+        });
     }
   }, [user?.id]);
 
-  // 2. Hàm lấy chi tiết sản phẩm khi click vào một đơn hàng
-  const handleViewDetails = async (orderId) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/orders/${orderId}/details`);
-      setSelectedOrderDetails(res.data);
-      setActiveOrderId(orderId);
-    } catch (err) {
-      console.error("Lỗi lấy chi tiết đơn hàng:", err);
-      alert("Không thể tải chi tiết đơn hàng này.");
-    }
+  const renderStatus = (status) => {
+    const statusMap = {
+      'pending': { text: '🕒 Chờ xử lý', color: '#f39c12', bg: '#fef5e7' },
+      'shipped': { text: '🚚 Đang giao hàng', color: '#3498db', bg: '#ebf5fb' },
+      'delivered': { text: '✅ Hoàn thành', color: '#27ae60', bg: '#eafaf1' },
+      'canceled': { text: '❌ Đã hủy', color: '#e74c3c', bg: '#fdedec' }
+    };
+
+    const current = statusMap[status] || { text: status, color: '#7f8c8d', bg: '#f4f6f7' };
+
+    return (
+      <span style={{ 
+        padding: '6px 15px', 
+        borderRadius: '20px', 
+        fontSize: '13px', 
+        fontWeight: 'bold',
+        color: current.color,
+        backgroundColor: current.bg
+      }}>
+        {current.text}
+      </span>
+    );
   };
 
-  // 3. Hàm hiển thị trạng thái tiếng Việt
-  const renderStatus = (status) => {
-    switch (status) {
-      case 'pending': return <span style={{color: '#f39c12'}}>🕒 Chờ xử lý</span>;
-      case 'shipped': return <span style={{color: '#3498db'}}>🚚 Đang giao hàng</span>;
-      case 'delivered': return <span style={{color: '#27ae60'}}>✅ Hoàn thành</span>;
-      case 'canceled': return <span style={{color: '#e74c3c'}}>❌ Đã hủy</span>;
-      default: return <span>{status}</span>;
-    }
-  };
+  if (loading) return <div style={styles.container}><p style={{textAlign: 'center'}}>Đang tải dữ liệu...</p></div>;
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>📦 TIẾN ĐỘ ĐƠN HÀNG CỦA BẠN</h2>
+      <h2 style={styles.header}>📦 TIẾN ĐỘ ĐƠN HÀNG</h2>
       
       <div style={styles.flexLayout}>
-        {/* CỘT TRÁI: DANH SÁCH ĐƠN HÀNG */}
         <div style={styles.listSection}>
           {orders.length === 0 ? (
-            <p>Bạn chưa có đơn hàng nào.</p>
+            <div style={styles.emptyState}>
+              <p>Bạn chưa có đơn hàng nào.</p>
+            </div>
           ) : (
             orders.map(order => (
-              <div 
-                key={order.id} 
-                onClick={() => handleViewDetails(order.id)}
-                style={{
-                  ...styles.orderCard,
-                  borderLeft: activeOrderId === order.id ? '6px solid #2d3436' : '6px solid #ddd',
-                  backgroundColor: activeOrderId === order.id ? '#f1f2f6' : '#fff'
-                }}
-              >
+              <div key={order.id} style={styles.orderCard}>
                 <div style={styles.cardHeader}>
-                  <strong>Mã đơn: #{order.id}</strong>
+                  <span style={styles.orderIdText}>Mã đơn: #{order.id}</span>
                   {renderStatus(order.status)}
                 </div>
-                <div style={styles.cardBody}>
-                  <p>📅 Ngày đặt: {new Date(order.order_date).toLocaleString('vi-VN')}</p>
-                  <p>💰 Tổng tiền: <b style={{color: '#e67e22'}}>{order.total_money?.toLocaleString()}đ</b></p>
-                  <p>📍 Địa chỉ: {order.shipping_address}</p>
-                </div>
-                <div style={styles.cardFooter}>Bấm để xem chi tiết sản phẩm ↓</div>
-              </div>
-            ))
-          )}
-        </div>
 
-        {/* CỘT PHẢI: CHI TIẾT SẢN PHẨM TRONG ĐƠN */}
-        <div style={styles.detailSection}>
-          <h3 style={{marginTop: 0, borderBottom: '2px solid #eee', paddingBottom: '10px'}}>
-            Chi tiết mặt hàng
-          </h3>
-          {!selectedOrderDetails ? (
-            <p style={{color: '#999', fontStyle: 'italic'}}>Chọn một đơn hàng bên trái để xem tiến độ chi tiết...</p>
-          ) : (
-            <div>
-              {selectedOrderDetails.map((item, index) => (
-                <div key={index} style={styles.productItem}>
-                  <img 
-                    src={`http://localhost:5000${item.image_url}`} 
-                    alt={item.product_name} 
-                    style={styles.productImg} 
-                  />
-                  <div style={styles.productInfo}>
-                    <div style={{fontWeight: 'bold'}}>{item.product_name}</div>
-                    <div style={{fontSize: '14px', color: '#666'}}>
-                      Số lượng: {item.quantity} | Giá: {item.price?.toLocaleString()}đ
-                    </div>
+                <div style={styles.cardBody}>
+                  <div style={styles.infoRow}>
+                    <span style={styles.label}>📅 Ngày đặt:</span>
+                    <span style={styles.value}>{new Date(order.order_date).toLocaleString('vi-VN')}</span>
+                  </div>
+                  <div style={styles.infoRow}>
+                    <span style={styles.label}>💰 Tổng tiền:</span>
+                    <span style={styles.totalValue}>
+                      {Number(order.total_money).toLocaleString('vi-VN')}đ
+                    </span>
+                  </div>
+                  <div style={styles.infoRow}>
+                    <span style={styles.label}>📍 Địa chỉ:</span>
+                    <span style={styles.value}>
+                      {order.shipping_address?.replace(/(\d)\s+([A-ZÀ-Ỹ])/u, '$1, $2')}
+                    </span>
+                  </div>
+                  <div style={styles.infoRow}>
+                    <span style={styles.label}>📞 Số điện thoại:</span>
+                    <span style={styles.value}>{order.phone}</span>
                   </div>
                 </div>
-              ))}
-              <div style={styles.supportNote}>
-                <p>Nếu đơn hàng có vấn đề, vui lòng liên hệ CSKH: <b>1900xxxx</b></p>
               </div>
-            </div>
+            ))
           )}
         </div>
       </div>
@@ -110,21 +97,56 @@ const MyOrders = () => {
   );
 };
 
-// CSS Styles
 const styles = {
-  container: { maxWidth: '1200px', margin: '40px auto', padding: '0 20px', fontFamily: 'Arial, sans-serif' },
-  header: { textAlign: 'center', marginBottom: '30px', color: '#2d3436' },
-  flexLayout: { display: 'flex', gap: '30px', flexWrap: 'wrap' },
-  listSection: { flex: 1.5, minWidth: '350px' },
-  detailSection: { flex: 1, minWidth: '300px', background: '#f9f9f9', padding: '25px', borderRadius: '15px', border: '1px solid #eee', height: 'fit-content', position: 'sticky', top: '20px' },
-  orderCard: { padding: '20px', borderRadius: '10px', marginBottom: '15px', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', transition: '0.3s' },
-  cardHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: '10px' },
-  cardBody: { fontSize: '14px', color: '#444', lineHeight: '1.6' },
-  cardFooter: { marginTop: '10px', fontSize: '12px', color: '#999', textAlign: 'right' },
-  productItem: { display: 'flex', gap: '15px', alignItems: 'center', padding: '15px 0', borderBottom: '1px solid #eee' },
-  productImg: { width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px' },
-  productInfo: { flex: 1 },
-  supportNote: { marginTop: '20px', textAlign: 'center', fontSize: '13px', color: '#888' }
+  container: { 
+    padding: '40px 20px', 
+    backgroundColor: '#f4f7f6', 
+    minHeight: '100vh',
+    fontFamily: '"Inter", sans-serif'
+  },
+  header: { 
+    textAlign: 'center', 
+    marginBottom: '40px', 
+    color: '#1a202c',
+    fontSize: '32px',
+    fontWeight: '700'
+  },
+  flexLayout: { display: 'flex', justifyContent: 'center', width: '100%' },
+  listSection: { 
+    width: '100%', 
+    maxWidth: '850px', 
+    display: 'flex', 
+    flexDirection: 'column', 
+    gap: '25px' 
+  },
+  orderCard: { 
+    backgroundColor: '#fff', 
+    borderRadius: '15px', 
+    padding: '25px', 
+    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+    border: '1px solid #e2e8f0'
+  },
+  cardHeader: { 
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    marginBottom: '20px',
+    paddingBottom: '15px',
+    borderBottom: '2px solid #f7fafc'
+  },
+  orderIdText: { fontSize: '18px', fontWeight: 'bold', color: '#2d3748' },
+  cardBody: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  infoRow: { display: 'flex', justifyContent: 'space-between', fontSize: '15px' },
+  label: { color: '#718096' },
+  value: { color: '#2d3748', fontWeight: '500' },
+  totalValue: { color: '#dd6b20', fontWeight: 'bold', fontSize: '18px' },
+  emptyState: {
+    textAlign: 'center',
+    padding: '60px',
+    backgroundColor: '#fff',
+    borderRadius: '15px',
+    color: '#a0aec0'
+  }
 };
 
 export default MyOrders;

@@ -41,13 +41,13 @@ const LoginPage = () => {
 
       if (res.data.success) {
         // Lưu thông tin vào localStorage
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        if (res.data.token) {
-          localStorage.setItem('token', res.data.token);
+        localStorage.setItem('user', JSON.stringify(res.data.data.user));
+        if (res.data.data.token) {
+          localStorage.setItem('token', res.data.data.token);
         }
 
         // Kiểm tra quyền (Role) để chuyển hướng cho đúng
-        if (res.data.user.role === 'admin') {
+        if (res.data.data.user.role === 'admin') {
           alert('Chào sếp! Đang vào trang quản trị...');
           navigate('/admin/dashboard');
         } else {
@@ -81,7 +81,7 @@ const LoginPage = () => {
 
         <button type="submit">Login</button>
       </form>
-
+    
       {/* 3. NÚT ĐĂNG NHẬP GOOGLE */}
       <div style={{ maxWidth: '300px', display: 'flex', justifyContent: 'center' }}>
         <GoogleLogin
@@ -90,7 +90,6 @@ const LoginPage = () => {
             console.log('Đăng nhập Google thất bại');
             alert('Có lỗi xảy ra khi kết nối với Google!');
           }}
-          // useOneTap // Bỏ comment dòng này nếu bạn muốn hiện popup đăng nhập một chạm góc phải màn hình
         />
       </div>
     </div>
